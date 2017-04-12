@@ -3,7 +3,7 @@ export GO?=$(shell which go)
 export UPDATE?=
 export GOPATH?=$(shell mktemp -d)
 export LINTER=$(GOPATH)/bin/gometalinter.v1
-export LINTERCMD?=$(LINTER) -e ".*.gen.go" --cyclo-over=19 --line-length=120 --deadline=100s --disable-all --enable=structcheck --enable=deadcode --enable=gocyclo --enable=ineffassign --enable=golint --enable=goimports --enable=errcheck --enable=varcheck --enable=goconst --enable=gosimple --enable=staticcheck --enable=misspell
+export LINTERCMD?=$(LINTER) -e ".*.gen.go" -e "upstream.go" -e "tmp" --cyclo-over=19 --line-length=120 --deadline=100s --disable-all --enable=structcheck --enable=deadcode --enable=gocyclo --enable=ineffassign --enable=golint --enable=goimports --enable=errcheck --enable=varcheck --enable=goconst --enable=gosimple --enable=staticcheck --enable=misspell
 
 $(SERVICE_ROOT)/tmp/ip2l/IP-COUNTRY-REGION-CITY.BIN:
 	mkdir -p $(SERVICE_ROOT)/tmp/ip2l
@@ -27,7 +27,7 @@ linter:
 $(LINTER):
 	@[ -f $(LINTER) ] || make -f Makefile.mk linter
 
-test: convey $(LINTER)
+test: $(SERVICE_ROOT)/ip2location/data.gen.go convey $(LINTER)
 	rm -rf $(GOPATH)/src/services
 	mkdir -p $(GOPATH)/src/ && cp -r $(SERVICE_ROOT) $(GOPATH)/src/
 	$(LINTERCMD) $(GOPATH)/src/services/...

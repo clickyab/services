@@ -4,8 +4,7 @@ import (
 	"runtime"
 	"services/assert"
 
-	"gopkg.in/fzerorubigd/onion.v2"
-	_ "gopkg.in/fzerorubigd/onion.v2/yamlloader" // config need this to load yaml file
+	onion "gopkg.in/fzerorubigd/onion.v2"
 )
 
 var (

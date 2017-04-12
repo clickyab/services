@@ -1,18 +1,18 @@
 package client
 
 import (
+	"encoding/json"
 	"fmt"
 	"net/http"
-	"time"
-
-	"encoding/json"
 	"services/assert"
+	"time"
 
 	"github.com/Sirupsen/logrus"
 )
 
 var client *http.Client
 
+// IP2lData struct
 type IP2lData struct {
 	CountryShort string `json:"country_short"`
 	CountryLong  string `json:"country_long"`
@@ -29,6 +29,7 @@ func createConnection() {
 	}
 }
 
+// IP2Location return IP2lData from IP
 func IP2Location(ip string) IP2lData {
 	target := fmt.Sprintf("http://%s/%s", ip2lserver, ip)
 	logrus.Debug(target)
