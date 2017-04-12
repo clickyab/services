@@ -26,7 +26,7 @@ type Initializer interface {
 }
 
 //Initialize try to initialize config
-func Initialize(organization, appName, prefix string) {
+func Initialize(organization, appName, prefix string, layers ...onion.Layer) {
 	usr, err := user.Current()
 	if err != nil {
 		logrus.Warn(err)
@@ -37,6 +37,17 @@ func Initialize(organization, appName, prefix string) {
 	}
 
 	assert.Nil(o.AddLayer(defaultLayer()))
+	for i := range all {
+		nL := all[i].Initialize(o)
+		for l := range nL {
+			_ = o.AddLayer(nL[l])
+		}
+	}
+	// now add the layer provided by app
+	for i := range layers {
+		_ = o.AddLayer(layers[i])
+	}
+	// Now load external config to overwrite them all.
 	if err = o.AddLayer(onion.NewFileLayer("/etc/" + organization + "/" + appName + ".yaml")); err == nil {
 
 		logrus.Infof("loading config from %s", "/etc/"+organization+"/"+appName+".yaml")
@@ -47,16 +58,10 @@ func Initialize(organization, appName, prefix string) {
 	if err = o.AddLayer(onion.NewFileLayer(dir + "/configs/" + appName + ".yaml")); err == nil {
 		logrus.Infof("loading config from %s", dir+"/configs/"+appName+".yaml")
 	}
-	for i := range all {
-		nL := all[i].Initialize(o)
-		for l := range nL {
-			_ = o.AddLayer(nL[l])
-		}
-	}
-
 	o.AddLazyLayer(extraenv.NewExtraEnvLayer(prefix))
 
 	o.GetStruct("core", &cfg)
+	// tell them that every thing is loaded
 	for i := range all {
 		all[i].Loaded()
 	}
