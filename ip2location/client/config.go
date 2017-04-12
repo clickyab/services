@@ -17,12 +17,12 @@ type cfgInitializer struct {
 func (ci *cfgInitializer) Initialize(o *onion.Onion) []onion.Layer {
 	ci.o = o
 	l := onion.NewDefaultLayer()
-	l.SetDefault("services.ip2location.client.endpoint", "127.0.0.1:8090")
+	l.SetDefault("service.ip2location.client.endpoint", "127.0.0.1:8190")
 	return []onion.Layer{l}
 }
 
 func (ci *cfgInitializer) Loaded() {
-	ip2lserver = ci.o.GetStringDefault("services.ip2location.client.endpoint", "127.0.0.1:8090")
+	ip2lserver = ci.o.GetStringDefault("service.ip2location.client.endpoint", "127.0.0.1:8190")
 }
 
 func init() {

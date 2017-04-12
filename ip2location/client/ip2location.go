@@ -5,8 +5,10 @@ import (
 	"net/http"
 	"time"
 
-	"services/assert"
 	"encoding/json"
+	"services/assert"
+
+	"github.com/Sirupsen/logrus"
 )
 
 var client *http.Client
@@ -29,10 +31,12 @@ func createConnection() {
 
 func IP2Location(ip string) IP2lData {
 	target := fmt.Sprintf("http://%s/%s", ip2lserver, ip)
+	logrus.Debug(target)
 	req, err := http.NewRequest("GET", target, nil)
 	assert.Nil(err)
 	resp, err := client.Do(req)
 	if err != nil {
+		logrus.Debug(err)
 		return IP2lData{
 			City:         "-",
 			CountryLong:  "-",
@@ -45,6 +49,7 @@ func IP2Location(ip string) IP2lData {
 	i := IP2lData{}
 	err = dec.Decode(&i)
 	if err != nil {
+		logrus.Debug(err)
 		return IP2lData{
 			City:         "-",
 			CountryLong:  "-",
