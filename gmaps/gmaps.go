@@ -1,11 +1,11 @@
 package gmaps
 
 import (
-	"services/assert"
 	"bytes"
 	"errors"
 	"io/ioutil"
 	"net/http"
+	"services/assert"
 )
 
 var (

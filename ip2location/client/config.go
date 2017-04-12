@@ -3,7 +3,7 @@ package client
 import (
 	"services/config"
 
-	"gopkg.in/fzerorubigd/onion.v2"
+	onion "gopkg.in/fzerorubigd/onion.v2"
 )
 
 var (

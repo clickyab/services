@@ -31,7 +31,7 @@ func Register(s Factory) {
 	factory = s
 }
 
-// GetSyncStore return an in cluster sync
+// GetStatisticStore return an in cluster sync
 func GetStatisticStore(key string, expire time.Duration) Interface {
 	assert.NotNil(factory, "[BUG] cluster factory is not set")
 	return factory(key, expire)
