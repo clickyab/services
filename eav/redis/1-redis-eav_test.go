@@ -12,7 +12,7 @@ import (
 )
 
 func TestSpec(t *testing.T) {
-	config.Initialize()
+	config.Initialize("test", "test", "test")
 	defer initializer.Initialize()()
 
 	Convey("Test keyvalue store for redis", t, func() {

@@ -38,7 +38,7 @@ func (cp *able) String() string {
 }
 
 func TestCacheSystem(t *testing.T) {
-	config.Initialize()
+	config.Initialize("test", "test", "test")
 	defer initializer.Initialize()()
 
 	ch := redisCache{}

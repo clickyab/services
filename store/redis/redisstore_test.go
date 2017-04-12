@@ -12,7 +12,7 @@ import (
 )
 
 func TestSyncStore(t *testing.T) {
-	config.Initialize()
+	config.Initialize("test", "test", "test")
 	defer initializer.Initialize()()
 	Convey("Test simple push/pop", t, func() {
 		tmp := store.GetSyncStore()
