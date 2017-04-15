@@ -15,21 +15,16 @@ service_bindata:
 $(SERVICE_ROOT)/ip2location/data.gen.go: $(SERVICE_ROOT)/tmp/ip2l/IP-COUNTRY-REGION-CITY.BIN service_bindata
 	cd $(SERVICE_ROOT)/tmp/ip2l && $(SERVICE_ROOT)/tmp/bin/go-bindata -nomemcopy -o $(SERVICE_ROOT)/ip2location/data.gen.go -pkg ip2location .
 
-all: $(SERVICE_ROOT)/ip2location/data.gen.go
-
-convey:
+services_convey:
 	$(GO) get -v github.com/smartystreets/goconvey/...
 
-linter:
+services_linter:
 	$(GO) get -v gopkg.in/alecthomas/gometalinter.v1
 	$(LINTER) --install
 
-$(LINTER):
-	@[ -f $(LINTER) ] || make -f Makefile.mk linter
-
-test: $(SERVICE_ROOT)/ip2location/data.gen.go convey $(LINTER)
+services_test: $(SERVICE_ROOT)/ip2location/data.gen.go services_convey services_linter
 	rm -rf $(GOPATH)/src/services
-	mkdir -p $(GOPATH)/src/ && cp -r $(SERVICE_ROOT) $(GOPATH)/src/
+	mkdir -p $(GOPATH)/src/services && cp -r $(SERVICE_ROOT)/* $(GOPATH)/src/services/
 	$(LINTERCMD) $(GOPATH)/src/services/...
 	$(GO) get -v github.com/smartystreets/goconvey/...
 	cd $(GOPATH)/src/services && $(GO) get -v ./...
