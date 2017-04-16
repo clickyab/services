@@ -15,7 +15,10 @@ service_bindata:
 $(SERVICES_ROOT)/ip2location/data.gen.go: $(SERVICES_ROOT)/tmp/ip2l/IP-COUNTRY-REGION-CITY.BIN service_bindata
 	cd $(SERVICES_ROOT)/tmp/ip2l && $(SERVICES_ROOT)/tmp/bin/go-bindata -nomemcopy -o $(SERVICES_ROOT)/ip2location/data.gen.go -pkg ip2location .
 
-services_ip2l: $(SERVICES_ROOT)/ip2location/data.gen.go
+services_dummy_ip2l:
+	@[ -f $(SERVICES_ROOT)/ip2location/data.gen.go ] || make -f Makefile.mk $(SERVICES_ROOT)/ip2location/data.gen.go
+
+services_ip2l: services_dummy_ip2l
 
 services_convey:
 	$(GO) get -v github.com/smartystreets/goconvey/...
