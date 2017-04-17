@@ -60,6 +60,8 @@ func Initialize(organization, appName, prefix string, layers ...onion.Layer) {
 	}
 	o.AddLazyLayer(extraenv.NewExtraEnvLayer(prefix))
 
+	// load all registered variables
+	load(o)
 	o.GetStruct("core", &cfg)
 	// tell them that every thing is loaded
 	for i := range all {
