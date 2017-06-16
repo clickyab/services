@@ -53,7 +53,7 @@ func (cn consumer) RegisterConsumer(consumer broker.Consumer) error {
 	// the next worker get nothing at all!
 	// **WARNING**
 	// TODO : limit on workers must match with this prefetch
-	err = c.Qos(*prefetchCount, 0, false)
+	err = c.Qos(prefetchCount.Int(), 0, false)
 	if err != nil {
 		return err
 	}

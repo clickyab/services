@@ -14,6 +14,7 @@ import (
 
 	"github.com/GeertJohan/go.rice"
 	"github.com/Sirupsen/logrus"
+	"gopkg.in/fzerorubigd/onion.v3"
 	echo "gopkg.in/labstack/echo.v3"
 )
 
@@ -31,7 +32,7 @@ var (
 	// this is development mode
 	devel      = config.RegisterBoolean("core.devel_mode", true, "core developer mode")
 	mountPoint = config.RegisterString("services.httplib.controller.mount_point", "/api", "http controller mount point")
-	listen     *string
+	listen     onion.String
 )
 
 // Register a new controller class
@@ -47,16 +48,16 @@ type master struct {
 func (*master) Initialize(ctx context.Context) {
 	engine = echo.New()
 	mid := []echo.MiddlewareFunc{middlewares.Recovery, middlewares.Logger}
-	if *cors {
+	if cors.Bool() {
 		mid = append(mid, middlewares.CORS())
 	}
 	engine.Use(mid...)
 	for i := range all {
-		all[i].Routes(engine, *mountPoint)
+		all[i].Routes(engine, mountPoint.String())
 	}
 
 	//engine.SetLogLevel(log.DEBUG)
-	if *devel {
+	if devel.Bool() {
 		assetHandler := http.FileServer(rice.MustFindBox("../statics/swagger/").HTTPBox())
 		engine.Any("/swagger/*", func(c echo.Context) error {
 			http.StripPrefix("/swagger/", assetHandler).
@@ -67,7 +68,7 @@ func (*master) Initialize(ctx context.Context) {
 	engine.Logger = NewLogger()
 
 	go func() {
-		if err := engine.Start(*listen); err != nil {
+		if err := engine.Start(listen.String()); err != nil {
 			logrus.Error(err)
 		}
 	}()

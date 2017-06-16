@@ -4,8 +4,7 @@ import (
 	"sync"
 	"time"
 
-	"github.com/Sirupsen/logrus"
-	"gopkg.in/fzerorubigd/onion.v2"
+	"gopkg.in/fzerorubigd/onion.v3"
 )
 
 type variable struct {
@@ -19,133 +18,37 @@ var (
 )
 
 // RegisterString add an string to config
-func RegisterString(key string, def string, description string) *string {
-	lock.Lock()
-	defer lock.Unlock()
-	var ref string
-
+func RegisterString(key string, def string, description string) onion.String {
 	setDescription(key, description)
-	allVariables = append(allVariables, variable{
-		ref: &ref,
-		def: def,
-		key: key,
-	})
-
-	return &ref
+	return o.RegisterString(key, def)
 }
 
 // RegisterInt add an int to config
-func RegisterInt(key string, def int, description string) *int {
-	lock.Lock()
-	defer lock.Unlock()
-	var ref int
-
+func RegisterInt(key string, def int, description string) onion.Int {
 	setDescription(key, description)
-	allVariables = append(allVariables, variable{
-		ref: &ref,
-		def: def,
-		key: key,
-	})
-
-	return &ref
+	return o.RegisterInt(key, def)
 }
 
 // RegisterInt64 add an int to config
-func RegisterInt64(key string, def int64, description string) *int64 {
-	lock.Lock()
-	defer lock.Unlock()
-	var ref int64
+func RegisterInt64(key string, def int64, description string) onion.Int {
 	setDescription(key, description)
-
-	allVariables = append(allVariables, variable{
-		ref: &ref,
-		def: def,
-		key: key,
-	})
-
-	return &ref
+	return o.RegisterInt64(key, def)
 }
 
 // RegisterFloat64 add an int to config
-func RegisterFloat64(key string, def float64, description string) *float64 {
-	lock.Lock()
-	defer lock.Unlock()
-	var ref float64
+func RegisterFloat64(key string, def float64, description string) onion.Float {
 	setDescription(key, description)
-
-	allVariables = append(allVariables, variable{
-		ref: &ref,
-		def: def,
-		key: key,
-	})
-
-	return &ref
+	return o.RegisterFloat64(key, def)
 }
 
 // RegisterBoolean add a boolean to config
-func RegisterBoolean(key string, def bool, description string) *bool {
-	lock.Lock()
-	defer lock.Unlock()
-	var ref bool
+func RegisterBoolean(key string, def bool, description string) onion.Bool {
 	setDescription(key, description)
-
-	allVariables = append(allVariables, variable{
-		ref: &ref,
-		def: def,
-		key: key,
-	})
-
-	return &ref
+	return o.RegisterBool(key, def)
 }
 
 // RegisterDuration add an duration to config
-func RegisterDuration(key string, def time.Duration, description string) *time.Duration {
-	lock.Lock()
-	defer lock.Unlock()
-	var ref time.Duration
+func RegisterDuration(key string, def time.Duration, description string) onion.Int {
 	setDescription(key, description)
-
-	allVariables = append(allVariables, variable{
-		ref: &ref,
-		def: def,
-		key: key,
-	})
-
-	return &ref
-}
-
-func load(o *onion.Onion) {
-	lock.Lock()
-	defer lock.Unlock()
-
-	for i := range allVariables {
-		switch t := allVariables[i].def.(type) {
-		case string:
-			v := o.GetStringDefault(allVariables[i].key, t)
-			vs := allVariables[i].ref.(*string)
-			*vs = v
-		case bool:
-			v := o.GetBoolDefault(allVariables[i].key, t)
-			vs := allVariables[i].ref.(*bool)
-			*vs = v
-		case int:
-			v := o.GetIntDefault(allVariables[i].key, t)
-			vs := allVariables[i].ref.(*int)
-			*vs = v
-		case int64:
-			v := o.GetInt64Default(allVariables[i].key, t)
-			vs := allVariables[i].ref.(*int64)
-			*vs = v
-		case float64:
-			v := o.GetFloat64Default(allVariables[i].key, t)
-			vs := allVariables[i].ref.(*float64)
-			*vs = v
-		case time.Duration:
-			v := o.GetDurationDefault(allVariables[i].key, t)
-			vs := allVariables[i].ref.(*time.Duration)
-			*vs = v
-		default:
-			logrus.Panic("wtf :/")
-		}
-	}
+	return o.RegisterDuration(key, def)
 }

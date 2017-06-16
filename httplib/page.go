@@ -24,8 +24,8 @@ func GetPageAndCount(r *http.Request, offset bool) (int, int) {
 
 	c64, err := strconv.ParseInt(r.URL.Query().Get("c"), 10, 0)
 	c := int(c64)
-	if err != nil || c > *maxPerPage || c < *minPerPage {
-		c = *perPage
+	if err != nil || c > maxPerPage.Int() || c < minPerPage.Int() {
+		c = perPage.Int()
 	}
 
 	if offset {

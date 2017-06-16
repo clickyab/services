@@ -23,11 +23,11 @@ type initRedis struct {
 func (initRedis) Initialize(ctx context.Context) {
 	Client = redis.NewClient(
 		&redis.Options{
-			Network:  *network,
-			Addr:     *address,
-			Password: *password,
-			PoolSize: *poolsize,
-			DB:       *db,
+			Network:  network.String(),
+			Addr:     address.String(),
+			Password: password.String(),
+			PoolSize: poolsize.Int(),
+			DB:       db.Int(),
 		},
 	)
 	// PING the server to make sure every thing is fine

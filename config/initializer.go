@@ -9,8 +9,8 @@ import (
 	"github.com/fzerorubigd/services/assert"
 
 	"github.com/Sirupsen/logrus"
-	onion "gopkg.in/fzerorubigd/onion.v2"
-	"gopkg.in/fzerorubigd/onion.v2/extraenv"
+	onion "gopkg.in/fzerorubigd/onion.v3"
+	"gopkg.in/fzerorubigd/onion.v3/extraenv"
 )
 
 var (
@@ -62,7 +62,7 @@ func Initialize(organization, appName, prefix string, layers ...onion.Layer) {
 	o.AddLazyLayer(extraenv.NewExtraEnvLayer(prefix))
 
 	// load all registered variables
-	load(o)
+	o.Load()
 	o.GetStruct("core", &cfg)
 	// tell them that every thing is loaded
 	for i := range all {
@@ -97,6 +97,8 @@ func SetConfigParameter() {
 }
 
 func setDescription(key, desc string) {
+	lock.Lock()
+	defer lock.Unlock()
 	configs[key] = desc
 }
 

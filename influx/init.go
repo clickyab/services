@@ -34,13 +34,13 @@ var (
 )
 
 func (inf *initInflux) createClient() (client.Client, error) {
-	switch *proto {
+	switch proto.String() {
 	case "http":
 		return client.NewHTTPClient(
 			client.HTTPConfig{
-				Addr:     *server,
-				Username: *user,
-				Password: *password,
+				Addr:     server.String(),
+				Username: user.String(),
+				Password: password.String(),
 				// TODO : why not config?
 				Timeout: time.Second,
 			},
@@ -49,11 +49,11 @@ func (inf *initInflux) createClient() (client.Client, error) {
 		// UDP type dose not support
 		return client.NewUDPClient(
 			client.UDPConfig{
-				Addr: *server,
+				Addr: server.String(),
 			},
 		)
 	default:
-		return nil, fmt.Errorf("invalid client proto in config : %s", *proto)
+		return nil, fmt.Errorf("invalid client proto in config : %s", proto.String())
 	}
 }
 
@@ -85,9 +85,9 @@ func (inf *initInflux) inputLoop(p *client.Point) error {
 
 	inf.bp.AddPoint(p)
 	inf.count++
-	if inf.count > *bufferSize {
+	if inf.count > bufferSize.Int() {
 		err := inf.flush()
-		if err != nil && inf.count > *bufferSize*5 {
+		if err != nil && inf.count > bufferSize.Int()*5 {
 			logrus.Panicf("to many error, last one was: %s", err)
 		}
 	}
@@ -108,7 +108,7 @@ func (inf *initInflux) Initialize(ctx context.Context) {
 
 	// TODO : more config
 	inf.cfg = client.BatchPointsConfig{
-		Database: *database,
+		Database: database.String(),
 	}
 
 	inf.bp, err = client.NewBatchPoints(inf.cfg)

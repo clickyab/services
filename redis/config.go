@@ -8,16 +8,18 @@ import (
 	"regexp"
 
 	"fmt"
+
+	"gopkg.in/fzerorubigd/onion.v3"
 )
 
 var redisPattern = regexp.MustCompile("^redis://([^:]+):([^@]+)@([^:]+):([0-9]+)$")
 
 var (
-	network  *string
-	address  *string
-	password *string
-	poolsize *int
-	db       *int
+	network  onion.String
+	address  onion.String
+	password onion.String
+	poolsize onion.Int
+	db       onion.Int
 )
 
 func init() {

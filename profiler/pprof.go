@@ -29,30 +29,30 @@ type initSystem struct {
 func (pi *initSystem) Initialize(ctx context.Context) {
 	done := ctx.Done()
 	assert.NotNil(done, "[BUG] the context is not supporting cancel")
-	switch *mode {
+	switch mode.String() {
 	case "cpu":
 		pi.profiler = profile.Start(
 			profile.CPUProfile,
 			profile.NoShutdownHook,
-			profile.ProfilePath(filepath.Join(*root, <-random.ID)),
+			profile.ProfilePath(filepath.Join(root.String(), <-random.ID)),
 		)
 	case "mem":
 		pi.profiler = profile.Start(
 			profile.MemProfile,
 			profile.NoShutdownHook,
-			profile.ProfilePath(filepath.Join(*root, <-random.ID)),
+			profile.ProfilePath(filepath.Join(root.String(), <-random.ID)),
 		)
 	case "trace":
 		pi.profiler = profile.Start(
 			profile.TraceProfile,
 			profile.NoShutdownHook,
-			profile.ProfilePath(filepath.Join(*root, <-random.ID)),
+			profile.ProfilePath(filepath.Join(root.String(), <-random.ID)),
 		)
 	case "block":
 		pi.profiler = profile.Start(
 			profile.BlockProfile,
 			profile.NoShutdownHook,
-			profile.ProfilePath(filepath.Join(*root, <-random.ID)),
+			profile.ProfilePath(filepath.Join(root.String(), <-random.ID)),
 		)
 	default:
 		logrus.Debug("Profiler disabled")

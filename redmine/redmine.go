@@ -30,13 +30,13 @@ func (reporter) Initialize() config.DescriptiveLayer {
 
 // Loaded is called after config loading, so the active is ready here
 func (r *reporter) Loaded() {
-	if *active {
+	if active.Bool() {
 		safe.Register(r)
 	}
 }
 
 func (reporter) Recover(err error, ds []byte, extra ...interface{}) {
-	c := redmine.NewClient(*url, *apiKey)
+	c := redmine.NewClient(url.String(), apiKey.String())
 
 	// redmine can not accept more than 255 character title
 	var title error
@@ -70,7 +70,7 @@ func (reporter) Recover(err error, ds []byte, extra ...interface{}) {
 	var is *redmine.Issue
 	if len(issues) > 0 {
 		for i := range issues {
-			if issues[i].Status.Id == *newIssueTypeID {
+			if issues[i].Status.Id == newIssueTypeID.Int() {
 				is = &issues[i]
 				break
 			}
@@ -87,7 +87,7 @@ func (reporter) Recover(err error, ds []byte, extra ...interface{}) {
 		is = &redmine.Issue{}
 		is.Subject = title.Error()
 		is.Description = stack
-		is.ProjectId = *projectID
+		is.ProjectId = projectID.Int()
 
 		_, err := c.CreateIssue(*is)
 		if err != nil {

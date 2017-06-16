@@ -6,8 +6,8 @@ import (
 
 	"github.com/fzerorubigd/services/assert"
 
-	onion "gopkg.in/fzerorubigd/onion.v2"
-	_ "gopkg.in/fzerorubigd/onion.v2/yamlloader" // for loading yaml file
+	onion "gopkg.in/fzerorubigd/onion.v3"
+	_ "gopkg.in/fzerorubigd/onion.v3/yamlloader" // for loading yaml file
 )
 
 var (

@@ -11,10 +11,11 @@ import (
 	"github.com/fzerorubigd/expand"
 	"github.com/fzerorubigd/services/assert"
 	"github.com/fzerorubigd/services/config"
+	"gopkg.in/fzerorubigd/onion.v3"
 )
 
 var (
-	fp *string
+	fp onion.String
 )
 
 type fileMock struct {
@@ -23,7 +24,7 @@ type fileMock struct {
 }
 
 func newFileMock() (*fileMock, error) {
-	f, err := os.Open(*fp)
+	f, err := os.Open(fp.String())
 	if err != nil {
 		return nil, err
 	}

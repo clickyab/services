@@ -30,7 +30,7 @@ func (reporter) Initialize() config.DescriptiveLayer {
 
 // Loaded is called after config loading, so the active is ready here
 func (r *reporter) Loaded() {
-	if *active {
+	if active.Bool() {
 		safe.Register(r)
 	}
 }
@@ -57,12 +57,12 @@ type attachment struct {
 // SlackDoMessage Try to send message to configured slack channel
 func (reporter) Recover(err error, stack []byte, extra ...interface{}) {
 	payload := &payload{}
-	payload.Channel = *channel
+	payload.Channel = channel.String()
 
 	payload.Text = err.Error()
-	payload.Username = *userName
+	payload.Username = userName.String()
 	payload.Parse = "full" // WTF?
-	icon := *postIcon
+	icon := postIcon.String()
 	if icon != "" {
 		if icon[0] == ':' {
 			payload.IconEmoji = icon
@@ -96,7 +96,7 @@ func (reporter) Recover(err error, stack []byte, extra ...interface{}) {
 		return
 	}
 
-	resp, err := http.PostForm(*webHookURL, url.Values{"payload": {string(encoded)}})
+	resp, err := http.PostForm(webHookURL.String(), url.Values{"payload": {string(encoded)}})
 	if err != nil {
 		logrus.WithField("payload", payload).Warn(err)
 		return

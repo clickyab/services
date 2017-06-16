@@ -6,12 +6,13 @@ import (
 	"regexp"
 
 	"github.com/fzerorubigd/services/config"
+	"gopkg.in/fzerorubigd/onion.v3"
 )
 
 var mysqlPattern = regexp.MustCompile("^mysql://([^:]+):([^@]+)@([^:]+):([0-9]+)/([a-zA-Z0-9-_]+)$")
 var (
-	wdsn              *string
-	rdsn              *string
+	wdsn              onion.String
+	rdsn              onion.String
 	maxConnection     = config.RegisterInt("services.mysql.max_connection", 30, "max connection")
 	maxIdleConnection = config.RegisterInt("services.mysql.max_idle_connection", 5, "max idle connection")
 
