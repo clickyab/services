@@ -5,7 +5,7 @@ import (
 	"os"
 	"regexp"
 
-	"github.com/fzerorubigd/services/config"
+	"github.com/clickyab/services/config"
 	"gopkg.in/fzerorubigd/onion.v3"
 )
 

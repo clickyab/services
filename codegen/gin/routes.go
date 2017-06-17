@@ -11,8 +11,8 @@ import (
 	"strings"
 	"text/template"
 
-	"github.com/fzerorubigd/services/codegen/annotate"
-	"github.com/fzerorubigd/services/codegen/plugins"
+	"github.com/clickyab/services/codegen/annotate"
+	"github.com/clickyab/services/codegen/plugins"
 
 	"github.com/Sirupsen/logrus"
 	"github.com/goraz/humanize"
@@ -63,9 +63,9 @@ const tmpl = `
 package {{ .GroupPkg }}
 
 import (
-	"github.com/fzerorubigd/services/framework"
-	"github.com/fzerorubigd/services/framework/middleware"
-	"github.com/fzerorubigd/services/initializer"
+	"github.com/clickyab/services/framework"
+	"github.com/clickyab/services/framework/middleware"
+	"github.com/clickyab/services/initializer"
 	"github.com/rs/xhandler"
 	"github.com/rs/xmux"
 )

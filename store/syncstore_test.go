@@ -5,7 +5,7 @@ import (
 
 	"time"
 
-	"github.com/fzerorubigd/services/store/mock"
+	"github.com/clickyab/services/store/mock"
 
 	. "github.com/smartystreets/goconvey/convey"
 )

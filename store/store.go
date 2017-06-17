@@ -3,7 +3,7 @@ package store
 import (
 	"time"
 
-	"github.com/fzerorubigd/services/assert"
+	"github.com/clickyab/services/assert"
 )
 
 // Interface is the blocking store interface

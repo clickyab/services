@@ -6,8 +6,8 @@ import (
 	"net/http"
 	"net/http/httputil"
 
-	"github.com/fzerorubigd/services/config"
-	"github.com/fzerorubigd/services/safe"
+	"github.com/clickyab/services/config"
+	"github.com/clickyab/services/safe"
 
 	"github.com/Sirupsen/logrus"
 	"github.com/fzerorubigd/go-redmine"

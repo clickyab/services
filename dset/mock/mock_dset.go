@@ -4,8 +4,8 @@ import (
 	"sync"
 	"time"
 
-	"github.com/fzerorubigd/services/dset"
-	"github.com/fzerorubigd/services/safe"
+	"github.com/clickyab/services/dset"
+	"github.com/clickyab/services/safe"
 )
 
 var (

@@ -6,8 +6,8 @@ import (
 	"errors"
 	"sync"
 
-	"github.com/fzerorubigd/services/assert"
-	"github.com/fzerorubigd/services/initializer"
+	"github.com/clickyab/services/assert"
+	"github.com/clickyab/services/initializer"
 
 	"github.com/Sirupsen/logrus"
 	gorp "gopkg.in/gorp.v2"

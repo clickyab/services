@@ -3,7 +3,7 @@ package mysql
 import (
 	"database/sql"
 
-	"github.com/fzerorubigd/services/mysql"
+	"github.com/clickyab/services/mysql"
 	_ "github.com/go-sql-driver/mysql" // mysql driver
 )
 

@@ -10,8 +10,8 @@ import (
 	"regexp"
 	"strings"
 
-	"github.com/fzerorubigd/services/codegen/annotate"
-	"github.com/fzerorubigd/services/codegen/plugins"
+	"github.com/clickyab/services/codegen/annotate"
+	"github.com/clickyab/services/codegen/plugins"
 
 	"github.com/goraz/humanize"
 	"golang.org/x/tools/imports"

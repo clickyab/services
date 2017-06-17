@@ -11,8 +11,8 @@ import (
 	"strconv"
 	"strings"
 
-	"github.com/fzerorubigd/services/codegen/annotate"
-	"github.com/fzerorubigd/services/codegen/plugins"
+	"github.com/clickyab/services/codegen/annotate"
+	"github.com/clickyab/services/codegen/plugins"
 
 	"github.com/Sirupsen/logrus"
 	"github.com/goraz/humanize"

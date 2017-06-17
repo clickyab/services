@@ -3,9 +3,9 @@ package redis
 import (
 	"time"
 
-	"github.com/fzerorubigd/services/assert"
-	"github.com/fzerorubigd/services/redis"
-	"github.com/fzerorubigd/services/store"
+	"github.com/clickyab/services/assert"
+	"github.com/clickyab/services/redis"
+	"github.com/clickyab/services/store"
 )
 
 type storeRedis struct {

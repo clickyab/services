@@ -3,7 +3,7 @@ package mock
 import (
 	"time"
 
-	"github.com/fzerorubigd/services/eav"
+	"github.com/clickyab/services/eav"
 )
 
 // Kiwi is a mock kiwi

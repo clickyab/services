@@ -5,10 +5,10 @@ import (
 
 	"context"
 
-	"github.com/fzerorubigd/services/assert"
-	"github.com/fzerorubigd/services/framework"
-	"github.com/fzerorubigd/services/framework/middleware"
-	"github.com/fzerorubigd/services/trans"
+	"github.com/clickyab/services/assert"
+	"github.com/clickyab/services/framework"
+	"github.com/clickyab/services/framework/middleware"
+	"github.com/clickyab/services/trans"
 )
 
 // Base is the controller base for all controllers

@@ -5,7 +5,7 @@ import (
 	"time"
 
 	"github.com/Sirupsen/logrus"
-	"github.com/fzerorubigd/appsaz/framework"
+	"github.com/clickyab/services/framework"
 )
 
 type wrapper struct {

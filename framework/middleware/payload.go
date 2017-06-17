@@ -8,10 +8,10 @@ import (
 	"reflect"
 	"strings"
 
-	"github.com/fzerorubigd/appsaz/framework"
-	"github.com/fzerorubigd/services/array"
-	"github.com/fzerorubigd/services/assert"
-	"github.com/fzerorubigd/services/trans"
+	"github.com/clickyab/services/array"
+	"github.com/clickyab/services/assert"
+	"github.com/clickyab/services/framework"
+	"github.com/clickyab/services/trans"
 )
 
 const (

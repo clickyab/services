@@ -4,7 +4,7 @@ import (
 	"runtime"
 	"sync"
 
-	"github.com/fzerorubigd/services/assert"
+	"github.com/clickyab/services/assert"
 
 	onion "gopkg.in/fzerorubigd/onion.v3"
 	_ "gopkg.in/fzerorubigd/onion.v3/yamlloader" // for loading yaml file

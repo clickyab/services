@@ -1,6 +1,6 @@
 package influx
 
-import "github.com/fzerorubigd/services/config"
+import "github.com/clickyab/services/config"
 
 var (
 	server     = config.RegisterString("services.influx.server", "http://127.0.0.1:8600", "the influxdb server address")

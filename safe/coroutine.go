@@ -5,7 +5,7 @@ import (
 	"fmt"
 	"runtime/debug"
 
-	"github.com/fzerorubigd/services/version"
+	"github.com/clickyab/services/version"
 
 	"time"
 

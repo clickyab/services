@@ -3,7 +3,7 @@ package rabbitmq
 import (
 	"os"
 
-	"github.com/fzerorubigd/services/config"
+	"github.com/clickyab/services/config"
 )
 
 var cfg cfgLoader

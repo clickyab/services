@@ -3,9 +3,9 @@ package enum
 import (
 	"html/template"
 
-	"github.com/fzerorubigd/services/codegen/annotate"
+	"github.com/clickyab/services/codegen/annotate"
 
-	"github.com/fzerorubigd/services/codegen/plugins"
+	"github.com/clickyab/services/codegen/plugins"
 
 	"fmt"
 

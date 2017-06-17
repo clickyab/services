@@ -3,8 +3,8 @@ package ip2location
 import (
 	"context"
 
-	"github.com/fzerorubigd/services/assert"
-	"github.com/fzerorubigd/services/initializer"
+	"github.com/clickyab/services/assert"
+	"github.com/clickyab/services/initializer"
 )
 
 type initIP2location struct {

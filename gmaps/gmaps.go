@@ -6,7 +6,7 @@ import (
 	"io/ioutil"
 	"net/http"
 
-	"github.com/fzerorubigd/services/assert"
+	"github.com/clickyab/services/assert"
 )
 
 var (

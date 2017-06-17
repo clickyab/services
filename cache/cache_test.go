@@ -3,8 +3,8 @@ package cache_test
 import (
 	"testing"
 
-	. "github.com/fzerorubigd/services/cache"
-	"github.com/fzerorubigd/services/cache/mock"
+	. "github.com/clickyab/services/cache"
+	"github.com/clickyab/services/cache/mock"
 
 	"encoding/json"
 	"io"

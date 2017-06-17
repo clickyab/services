@@ -5,9 +5,9 @@ import (
 	"errors"
 	"sync"
 
-	"github.com/fzerorubigd/services/random"
+	"github.com/clickyab/services/random"
 
-	"github.com/fzerorubigd/services/broker"
+	"github.com/clickyab/services/broker"
 
 	"github.com/streadway/amqp"
 )

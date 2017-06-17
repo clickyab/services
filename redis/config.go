@@ -3,7 +3,7 @@ package aredis
 import (
 	"os"
 
-	"github.com/fzerorubigd/services/config"
+	"github.com/clickyab/services/config"
 
 	"regexp"
 

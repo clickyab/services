@@ -3,7 +3,7 @@ package mysql
 import (
 	"database/sql"
 
-	"github.com/fzerorubigd/services/mysql"
+	"github.com/clickyab/services/mysql"
 	"gopkg.in/DATA-DOG/go-sqlmock.v1"
 )
 

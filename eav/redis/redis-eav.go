@@ -4,8 +4,8 @@ import (
 	"sync"
 	"time"
 
-	"github.com/fzerorubigd/services/eav"
-	"github.com/fzerorubigd/services/redis"
+	"github.com/clickyab/services/eav"
+	"github.com/clickyab/services/redis"
 )
 
 type kiwiRedis struct {

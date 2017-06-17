@@ -1,11 +1,11 @@
 package aredis
 
 import (
-	"github.com/fzerorubigd/services/assert"
+	"github.com/clickyab/services/assert"
 
 	"context"
 
-	"github.com/fzerorubigd/services/initializer"
+	"github.com/clickyab/services/initializer"
 
 	"github.com/Sirupsen/logrus"
 	redis "gopkg.in/redis.v5"

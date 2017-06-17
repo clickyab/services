@@ -3,7 +3,7 @@ package eav
 import (
 	"time"
 
-	"github.com/fzerorubigd/services/assert"
+	"github.com/clickyab/services/assert"
 )
 
 // Kiwi is the key value storage system in a parent key

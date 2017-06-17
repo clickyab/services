@@ -1,4 +1,4 @@
-package framework
+package router
 
 import (
 	"context"
@@ -7,9 +7,10 @@ import (
 
 	rice "github.com/GeertJohan/go.rice"
 	"github.com/Sirupsen/logrus"
-	"github.com/fzerorubigd/services/assert"
-	"github.com/fzerorubigd/services/config"
-	"github.com/fzerorubigd/services/framework/middleware"
+	"github.com/clickyab/services/assert"
+	"github.com/clickyab/services/config"
+	"github.com/clickyab/services/framework"
+	"github.com/clickyab/services/framework/middleware"
 	"github.com/rs/cors"
 	"github.com/rs/xhandler"
 	"github.com/rs/xmux"
@@ -45,7 +46,7 @@ func (i *initializer) Initialize(ctx context.Context) {
 	//engine.SetLogLevel(log.DEBUG)
 	if devel.Bool() {
 		assetHandler := http.FileServer(rice.MustFindBox("../statics/swagger/").HTTPBox())
-		Any(engine, "/swagger/*", func(_ context.Context, w http.ResponseWriter, r *http.Request) {
+		framework.Any(engine, "/swagger/*", func(_ context.Context, w http.ResponseWriter, r *http.Request) {
 			http.StripPrefix("/swagger/", assetHandler).ServeHTTP(w, r)
 		})
 	}

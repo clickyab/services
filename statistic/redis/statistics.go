@@ -4,8 +4,8 @@ import (
 	"strconv"
 	"time"
 
-	"github.com/fzerorubigd/services/redis"
-	"github.com/fzerorubigd/services/statistic"
+	"github.com/clickyab/services/redis"
+	"github.com/clickyab/services/statistic"
 )
 
 type storeRedis struct {

@@ -7,8 +7,8 @@ import (
 
 	"time"
 
-	"github.com/fzerorubigd/services/statistic"
-	"github.com/fzerorubigd/services/statistic/mock"
+	"github.com/clickyab/services/statistic"
+	"github.com/clickyab/services/statistic/mock"
 )
 
 func TestStatisticStore(t *testing.T) {

@@ -8,9 +8,9 @@ import (
 
 	"time"
 
-	"github.com/fzerorubigd/services/config"
+	"github.com/clickyab/services/config"
 
-	"github.com/fzerorubigd/services/initializer"
+	"github.com/clickyab/services/initializer"
 
 	. "github.com/smartystreets/goconvey/convey"
 )

@@ -3,7 +3,7 @@ package mock
 import (
 	"sync"
 
-	"github.com/fzerorubigd/services/broker"
+	"github.com/clickyab/services/broker"
 )
 
 var (

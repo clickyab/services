@@ -3,7 +3,7 @@ package influx
 import (
 	"context"
 
-	"github.com/fzerorubigd/services/assert"
+	"github.com/clickyab/services/assert"
 
 	"fmt"
 
@@ -13,7 +13,7 @@ import (
 
 	"errors"
 
-	"github.com/fzerorubigd/services/initializer"
+	"github.com/clickyab/services/initializer"
 
 	"github.com/Sirupsen/logrus"
 	client "github.com/influxdata/influxdb/client/v2"

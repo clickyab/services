@@ -3,7 +3,7 @@ package broker
 import (
 	"sync"
 
-	"github.com/fzerorubigd/services/assert"
+	"github.com/clickyab/services/assert"
 )
 
 // Job is a normal job

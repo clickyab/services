@@ -10,9 +10,9 @@ import (
 	"strconv"
 	"strings"
 
-	"github.com/fzerorubigd/services/assert"
-	"github.com/fzerorubigd/services/codegen/annotate"
-	"github.com/fzerorubigd/services/codegen/plugins"
+	"github.com/clickyab/services/assert"
+	"github.com/clickyab/services/codegen/annotate"
+	"github.com/clickyab/services/codegen/plugins"
 
 	"github.com/Sirupsen/logrus"
 	"github.com/goraz/humanize"
@@ -38,8 +38,8 @@ var (
 	transferList = map[string]swaggerType{
 		"time.Time":    {"type": "string", "format": "dateTime"},
 		"sql.NullTime": {"type": "string", "format": "dateTime"},
-		"github.com/fzerorubigd/services/postgres/models/common.NullTime":   {"type": "string", "format": "dateTime"},
-		"github.com/fzerorubigd/services/postgres/models/common.NullString": {"type": "string"},
+		"github.com/clickyab/services/postgres/models/common.NullTime":   {"type": "string", "format": "dateTime"},
+		"github.com/clickyab/services/postgres/models/common.NullString": {"type": "string"},
 		"modules/balance/acc.Money":                                         {"type": "integer"},
 		"modules/user/aaa.UserStatus":                                       {"type": "string"},
 	}

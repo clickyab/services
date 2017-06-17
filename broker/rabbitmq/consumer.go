@@ -1,20 +1,20 @@
 package rabbitmq
 
 import (
-	"github.com/fzerorubigd/services/broker"
-	"github.com/fzerorubigd/services/random"
+	"github.com/clickyab/services/broker"
+	"github.com/clickyab/services/random"
 
 	"sync/atomic"
 
-	"github.com/fzerorubigd/services/safe"
+	"github.com/clickyab/services/safe"
 
 	"context"
 
 	"time"
 
 	"github.com/Sirupsen/logrus"
-	"github.com/fzerorubigd/services/assert"
-	"github.com/fzerorubigd/services/config"
+	"github.com/clickyab/services/assert"
+	"github.com/clickyab/services/config"
 	"github.com/streadway/amqp"
 )
 

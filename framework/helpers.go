@@ -6,7 +6,7 @@ import (
 	"net/http"
 	"strconv"
 
-	"github.com/fzerorubigd/services/config"
+	"github.com/clickyab/services/config"
 	"github.com/rs/xhandler"
 	"github.com/rs/xmux"
 )

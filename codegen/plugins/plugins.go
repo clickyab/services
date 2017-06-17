@@ -4,7 +4,7 @@ import (
 	"strings"
 	"sync"
 
-	"github.com/fzerorubigd/services/codegen/annotate"
+	"github.com/clickyab/services/codegen/annotate"
 
 	"sort"
 

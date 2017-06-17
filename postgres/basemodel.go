@@ -6,9 +6,9 @@ import (
 	"sync"
 
 	"github.com/Sirupsen/logrus"
-	"github.com/fzerorubigd/services/assert"
-	"github.com/fzerorubigd/services/initializer"
-	"github.com/fzerorubigd/services/postgres/model"
+	"github.com/clickyab/services/assert"
+	"github.com/clickyab/services/initializer"
+	"github.com/clickyab/services/postgres/model"
 	_ "github.com/lib/pq"
 	gorp "gopkg.in/gorp.v2" // Make sure postgres is included in any build
 )

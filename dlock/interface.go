@@ -4,7 +4,7 @@ import (
 	"sync"
 	"time"
 
-	"github.com/fzerorubigd/services/assert"
+	"github.com/clickyab/services/assert"
 )
 
 // DistributedLock is the distributed locker interface.

@@ -4,10 +4,10 @@ import (
 	"context"
 	"path/filepath"
 
-	"github.com/fzerorubigd/services/assert"
-	"github.com/fzerorubigd/services/config"
-	"github.com/fzerorubigd/services/initializer"
-	"github.com/fzerorubigd/services/random"
+	"github.com/clickyab/services/assert"
+	"github.com/clickyab/services/config"
+	"github.com/clickyab/services/initializer"
+	"github.com/clickyab/services/random"
 
 	"github.com/Sirupsen/logrus"
 	"github.com/fzerorubigd/expand"

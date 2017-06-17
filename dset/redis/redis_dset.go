@@ -5,8 +5,8 @@ import (
 
 	"sync"
 
-	"github.com/fzerorubigd/services/dset"
-	"github.com/fzerorubigd/services/redis"
+	"github.com/clickyab/services/dset"
+	"github.com/clickyab/services/redis"
 )
 
 type dsetRedis struct {

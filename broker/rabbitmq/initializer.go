@@ -6,8 +6,8 @@ import (
 	"sync"
 	"sync/atomic"
 
-	"github.com/fzerorubigd/services/assert"
-	"github.com/fzerorubigd/services/initializer"
+	"github.com/clickyab/services/assert"
+	"github.com/clickyab/services/initializer"
 
 	"github.com/Sirupsen/logrus"
 	"github.com/streadway/amqp"

@@ -3,8 +3,8 @@ package middleware
 import (
 	"net/http"
 
-	"github.com/fzerorubigd/appsaz/framework"
-	"github.com/fzerorubigd/services/safe"
+	"github.com/clickyab/services/framework"
+	"github.com/clickyab/services/safe"
 )
 
 // Recovery is the middleware to prevent the panic to crash the app

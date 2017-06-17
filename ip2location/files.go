@@ -9,8 +9,8 @@ import (
 	"os"
 
 	"github.com/fzerorubigd/expand"
-	"github.com/fzerorubigd/services/assert"
-	"github.com/fzerorubigd/services/config"
+	"github.com/clickyab/services/assert"
+	"github.com/clickyab/services/config"
 	"gopkg.in/fzerorubigd/onion.v3"
 )
 

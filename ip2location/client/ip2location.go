@@ -6,7 +6,7 @@ import (
 	"net/http"
 	"time"
 
-	"github.com/fzerorubigd/services/assert"
+	"github.com/clickyab/services/assert"
 
 	"github.com/Sirupsen/logrus"
 )

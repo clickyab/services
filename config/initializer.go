@@ -6,7 +6,7 @@ import (
 	"path/filepath"
 	"runtime"
 
-	"github.com/fzerorubigd/services/assert"
+	"github.com/clickyab/services/assert"
 
 	"github.com/Sirupsen/logrus"
 	onion "gopkg.in/fzerorubigd/onion.v3"

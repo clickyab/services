@@ -6,8 +6,8 @@ import (
 	"fmt"
 	"time"
 
-	"github.com/fzerorubigd/services/cache"
-	"github.com/fzerorubigd/services/redis"
+	"github.com/clickyab/services/cache"
+	"github.com/clickyab/services/redis"
 )
 
 type redisCache struct {

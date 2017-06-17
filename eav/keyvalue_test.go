@@ -3,8 +3,8 @@ package eav_test
 import (
 	"testing"
 
-	. "github.com/fzerorubigd/services/eav"
-	"github.com/fzerorubigd/services/eav/mock"
+	. "github.com/clickyab/services/eav"
+	"github.com/clickyab/services/eav/mock"
 
 	"time"
 

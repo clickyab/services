@@ -1,12 +1,12 @@
 package selector
 
 import (
-	"github.com/fzerorubigd/services/broker"
-	"github.com/fzerorubigd/services/broker/mock"
-	"github.com/fzerorubigd/services/config"
-	"github.com/fzerorubigd/services/safe"
+	"github.com/clickyab/services/broker"
+	"github.com/clickyab/services/broker/mock"
+	"github.com/clickyab/services/config"
+	"github.com/clickyab/services/safe"
 
-	"github.com/fzerorubigd/services/broker/rabbitmq"
+	"github.com/clickyab/services/broker/rabbitmq"
 
 	"github.com/Sirupsen/logrus"
 )

@@ -3,8 +3,8 @@ package dlock_test
 import (
 	"testing"
 
-	. "github.com/fzerorubigd/services/dlock"
-	"github.com/fzerorubigd/services/dlock/mock"
+	. "github.com/clickyab/services/dlock"
+	"github.com/clickyab/services/dlock/mock"
 
 	"time"
 

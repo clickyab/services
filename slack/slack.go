@@ -7,8 +7,8 @@ import (
 	"net/http/httputil"
 	"net/url"
 
-	"github.com/fzerorubigd/services/config"
-	"github.com/fzerorubigd/services/safe"
+	"github.com/clickyab/services/config"
+	"github.com/clickyab/services/safe"
 
 	"github.com/Sirupsen/logrus"
 )

@@ -4,10 +4,10 @@ import (
 	"testing"
 	"time"
 
-	"github.com/fzerorubigd/services/initializer"
-	"github.com/fzerorubigd/services/redis"
+	"github.com/clickyab/services/initializer"
+	"github.com/clickyab/services/redis"
 
-	config2 "github.com/fzerorubigd/services/config"
+	config2 "github.com/clickyab/services/config"
 
 	. "github.com/smartystreets/goconvey/convey"
 )

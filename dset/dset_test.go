@@ -4,8 +4,8 @@ import (
 	"testing"
 	"time"
 
-	. "github.com/fzerorubigd/services/dset"
-	"github.com/fzerorubigd/services/dset/mock"
+	. "github.com/clickyab/services/dset"
+	"github.com/clickyab/services/dset/mock"
 
 	"github.com/smartystreets/goconvey/convey"
 )

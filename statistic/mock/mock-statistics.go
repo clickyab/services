@@ -5,7 +5,7 @@ import (
 	"strconv"
 	"time"
 
-	"github.com/fzerorubigd/services/statistic"
+	"github.com/clickyab/services/statistic"
 )
 
 var (

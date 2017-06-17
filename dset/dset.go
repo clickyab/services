@@ -3,7 +3,7 @@ package dset
 import (
 	"time"
 
-	"github.com/fzerorubigd/services/assert"
+	"github.com/clickyab/services/assert"
 )
 
 // DistributedSet is a set distributed

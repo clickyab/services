@@ -6,7 +6,7 @@ import (
 	"sync"
 	"time"
 
-	"github.com/fzerorubigd/services/cache"
+	"github.com/clickyab/services/cache"
 )
 
 type cacheMock struct {

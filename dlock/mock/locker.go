@@ -4,7 +4,7 @@ import (
 	"sync"
 	"time"
 
-	"github.com/fzerorubigd/services/dlock"
+	"github.com/clickyab/services/dlock"
 )
 
 var (
