@@ -1,18 +1,17 @@
-package middlewares
+package middleware
 
 import (
+	"context"
 	"encoding/json"
 	"fmt"
 	"net/http"
 	"reflect"
 	"strings"
 
+	"github.com/fzerorubigd/appsaz/framework"
+	"github.com/fzerorubigd/services/array"
 	"github.com/fzerorubigd/services/assert"
 	"github.com/fzerorubigd/services/trans"
-
-	"github.com/fzerorubigd/services/array"
-
-	echo "gopkg.in/labstack/echo.v3"
 )
 
 const (
@@ -27,7 +26,7 @@ type (
 	// Validator is used to validate the input
 	Validator interface {
 		// Validate return true, nil on no error, false ,error map in error string
-		Validate(echo.Context) error
+		Validate(context.Context, http.ResponseWriter, *http.Request) error
 	}
 )
 
@@ -62,50 +61,49 @@ func translate(err error) interface{} {
 }
 
 // PayloadUnMarshallerGenerator create a middleware base on the pattern for the request body
-func PayloadUnMarshallerGenerator(pattern interface{}) echo.MiddlewareFunc {
-	return func(next echo.HandlerFunc) echo.HandlerFunc {
-		return func(c echo.Context) error {
+func PayloadUnMarshallerGenerator(pattern interface{}) framework.Middleware {
+	return func(next framework.Handler) framework.Handler {
+		return func(c context.Context, w http.ResponseWriter, r *http.Request) {
 			// Make sure the request is POST or PUT since DELETE and GET must not have payloads
-			method := strings.ToUpper(c.Request().Method)
+			method := strings.ToUpper(r.Method)
 			assert.True(
 				!array.StringInArray(method, "GET", "DELETE"),
 				"[BUG] Get and Delete must not have request body",
 			)
 			// Create a copy
 			cp := reflect.New(reflect.TypeOf(pattern)).Elem().Addr().Interface()
-			decoder := json.NewDecoder(c.Request().Body)
+			decoder := json.NewDecoder(r.Body)
 			err := decoder.Decode(cp)
 			if err != nil {
-				c.Request().Header.Set("error", trans.T("invalid request body").String())
+				w.Header().Set("error", trans.T("invalid request body").String())
 				e := struct {
 					Error error `json:"error"`
 				}{
 					Error: trans.E("invalid request body"),
 				}
 
-				c.JSON(http.StatusBadRequest, e)
-				return err
+				framework.JSON(w, http.StatusBadRequest, e)
+				return
 			}
 			if valid, ok := cp.(Validator); ok {
-				if errs := valid.Validate(c); errs == nil {
-					c.Set(ContextBody, cp)
+				if errs := valid.Validate(c, w, r); errs == nil {
+					c = context.WithValue(c, ContextBody, cp)
 				} else {
-					c.Request().Header.Set("error", trans.T("invalid request body").String())
-					c.JSON(http.StatusBadRequest, translate(errs))
-
-					return trans.E("invalid request body")
+					w.Header().Set("error", trans.T("invalid request body").String())
+					framework.JSON(w, http.StatusBadRequest, translate(errs))
+					return
 				}
 			} else {
 				// Just add it, no validation
-				c.Set(ContextBody, cp)
+				c = context.WithValue(c, ContextBody, cp)
 			}
-			return next(c)
+			next(c, w, r)
 		}
 	}
 }
 
 // GetPayload from the request
-func GetPayload(c echo.Context) (interface{}, bool) {
-	t := c.Get(ContextBody)
+func GetPayload(c context.Context) (interface{}, bool) {
+	t := c.Value(ContextBody)
 	return t, t != nil
 }

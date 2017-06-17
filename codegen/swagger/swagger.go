@@ -298,12 +298,7 @@ func (rg *swaggerGenerator) mix() error {
 // FunctionIsSupported check for a function signature and if the function is supported in this
 // interface
 func (rg *swaggerGenerator) FunctionIsSupported(f humanize.File, fn humanize.Function) bool {
-	str, b := findGinImport(f)
-	if !b {
-		return false
-	}
-
-	return isMatched(str, fn)
+	return isMatched("", fn)
 }
 
 // ProcessFunction the function with its annotation. any error here means to stop the
@@ -691,11 +686,11 @@ func getDoc(d humanize.Docs) string {
 }
 
 func isMatched(gin string, f humanize.Function) bool {
-	if len(f.Type.Results) != 1 {
+	if len(f.Type.Results) != 0 {
 		return false
 	}
 
-	if len(f.Type.Parameters) != 1 {
+	if len(f.Type.Parameters) != 3 {
 		return false
 	}
 
@@ -703,26 +698,19 @@ func isMatched(gin string, f humanize.Function) bool {
 		return false
 	}
 
-	if f.Type.Parameters[0].Type.GetDefinition() != fmt.Sprintf("%s.Context", gin) {
+	if f.Type.Parameters[0].Type.GetDefinition() != "context.Context" {
 		return false
 	}
 
-	if f.Type.Results[0].Type.GetDefinition() != "error" {
+	if f.Type.Parameters[1].Type.GetDefinition() != "http.ResponseWriter" {
+		return false
+	}
+
+	if f.Type.Parameters[2].Type.GetDefinition() != "*http.Request" {
 		return false
 	}
 
 	return true
-}
-
-func findGinImport(f humanize.File) (string, bool) {
-	for i := range f.Imports {
-		if f.Imports[i].Path == ginImportPath {
-			// TODO : make sure edit this if you change this
-			return "echo", true
-		}
-	}
-
-	return "", false
 }
 
 func changeUrl(s string) (string, []string) {
@@ -794,7 +782,11 @@ func goToRaml(pkg humanize.Package, tn humanize.Type) (swaggerType, error) {
 func selectorType(pkg humanize.Package, i *humanize.SelectorType) (swaggerType, error) {
 	for param, res := range transferList {
 		ident := strings.Split(param, ".")
-		assert.True(len(ident) == 2, "[BUG] len is not 2")
+		if len(ident) == 3 {
+			ident[0] = ident[0] + "." + ident[1]
+			ident[1] = ident[2]
+		}
+
 		if i.Type.(*humanize.IdentType).Ident == ident[1] && i.Package().Path == ident[0] {
 			return res, nil
 		}
@@ -812,7 +804,11 @@ func selectorType(pkg humanize.Package, i *humanize.SelectorType) (swaggerType, 
 func identToRaml(pkg humanize.Package, i *humanize.IdentType) (swaggerType, error) {
 	for param, res := range transferList {
 		ident := strings.Split(param, ".")
-		assert.True(len(ident) == 2, "[BUG] len is not 2")
+		if len(ident) == 3 {
+			ident[0] = ident[0] + "." + ident[1]
+			ident[1] = ident[2]
+		}
+
 		if i.Ident == ident[1] && pkg.Path == ident[0] {
 			return res, nil
 		}

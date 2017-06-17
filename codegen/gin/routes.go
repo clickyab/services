@@ -63,36 +63,40 @@ const tmpl = `
 package {{ .GroupPkg }}
 
 import (
-	"gopkg.in/labstack/echo.v3"
+	"github.com/fzerorubigd/services/framework"
+	"github.com/fzerorubigd/services/framework/middleware"
+	"github.com/fzerorubigd/services/initializer"
+	"github.com/rs/xhandler"
+	"github.com/rs/xmux"
 )
 
 
 // Routes return the route registered with this
-func ({{ .GroupRec }} *{{ .StructName }}) Routes(r *echo.Echo, mountPoint string) {
+func ({{ .GroupRec }} *{{ .StructName }}) Routes(r *xmux.Mux, mountPoint string) {
 	{{ if .Full }}
-	groupMiddleware :=  []echo.MiddlewareFunc{
+	groupMiddleware := []framework.Middleware{
 		{{ range $gm := .GroupMiddleware }}{{ $gm }},
 		{{end}}
 	}
 	{{ if .GroupFuncMiddleware }}
 	groupMiddleware = append(groupMiddleware, {{ $.GroupRec }}.{{ $.GroupFuncMiddleware|strip_type }}()...)
 	{{ end }}
-	group := r.Group(mountPoint + "{{ .Group }}", groupMiddleware...)
+	group := r.NewGroup(mountPoint +  "{{ .Group }}")
 
 	{{ range $key ,$route := .Routes }}
 	/* Route {{ $route | jsonize }} with key {{ $key }} */
-	m{{ $key }} :=  []echo.MiddlewareFunc{
+	m{{ $key }} := append(groupMiddleware, []framework.Middleware{
 	{{ range $rm := .RouteMiddleware }}{{ $rm }},
 		{{end}}
-	}
+	}...)
 	{{ if $route.Resource }}
 	base.RegisterPermission("{{$route.Resource}}", "{{$route.Resource}}")
 	m{{ $key }} = append(m{{ $key }}, authz.AuthorizeGenerator("{{$route.Resource}}",base.UserScope("{{$route.Scope}}"))){{ end }}
 	{{ if $route.RouteFuncMiddleware }}
 	m{{ $key }} = append(m{{ $key }}, {{ $.GroupRec }}.{{ $route.RouteFuncMiddleware|strip_type }}()...){{ end }}
 	{{ if $route.Payload }} // Make sure payload is the last middleware
-	m{{ $key }} = append(m{{ $key }}, middlewares.PayloadUnMarshallerGenerator({{$route.Payload}}{})){{ end }}
-	group.{{ $route.Method }}("{{ $route.Route }}",{{ $.GroupRec }}.{{ $route.Function|strip_type }}, m{{ $key }}...)
+	m{{ $key }} = append(m{{ $key }}, middleware.PayloadUnMarshallerGenerator({{$route.Payload}}{})){{ end }}
+	group.{{ $route.Method }}("{{ $route.Route }}",xhandler.HandlerFuncC(framework.Mix({{ $.GroupRec }}.{{ $route.Function|strip_type }}, m{{ $key }}...)))
 	// End route with key {{ $key }}
 	{{ end }}
 	{{ end }}
@@ -101,9 +105,8 @@ func ({{ .GroupRec }} *{{ .StructName }}) Routes(r *echo.Echo, mountPoint string
 `
 
 var (
-	echoImportPath = "gopkg.in/labstack/echo.v3"
-	validMethod    = []string{"GET", "POST", "PUT", "PATCH", "HEAD", "OPTIONS", "DELETE", "CONNECT", "TRACE"}
-	fMap           = template.FuncMap{
+	validMethod = []string{"GET", "POST", "PUT", "PATCH", "HEAD", "OPTIONS", "DELETE", "CONNECT", "TRACE"}
+	fMap        = template.FuncMap{
 		"ucfirst":    ucFirst,
 		"md5":        md5Sum,
 		"strip_type": stripType,
@@ -397,10 +400,6 @@ func findFunction(p humanize.Package, t string) (*humanize.File, *humanize.Funct
 }
 
 func isValidMiddleware(file humanize.File, fn humanize.Function) bool {
-	gin, ok := findEchoImport(file)
-	if !ok {
-		return false
-	}
 	if len(fn.Type.Parameters) != 1 {
 		return false
 	}
@@ -410,23 +409,20 @@ func isValidMiddleware(file humanize.File, fn humanize.Function) bool {
 	}
 
 	typ := fn.Type.Results[0].Type
-	if typ.GetDefinition() != gin+".HandlerFunc" {
-		return false
-	}
-	typ = fn.Type.Parameters[0].Type
-	if typ.GetDefinition() != gin+".HandlerFunc" {
+	typ2 := fn.Type.Parameters[0].Type
+	if typ.GetDefinition() != typ2.GetDefinition() {
 		return false
 	}
 
 	return true
 }
 
-func isMatched(gin string, f humanize.Function) bool {
-	if len(f.Type.Results) != 1 {
+func isMatched(f humanize.Function) bool {
+	if len(f.Type.Results) != 0 {
 		return false
 	}
 
-	if len(f.Type.Parameters) != 1 {
+	if len(f.Type.Parameters) != 3 {
 		return false
 	}
 
@@ -434,33 +430,23 @@ func isMatched(gin string, f humanize.Function) bool {
 		return false
 	}
 
-	if f.Type.Parameters[0].Type.GetDefinition() != fmt.Sprintf("%s.Context", gin) {
+	if f.Type.Parameters[0].Type.GetDefinition() != "context.Context" {
 		return false
 	}
 
-	if f.Type.Results[0].Type.GetDefinition() != "error" {
+	if f.Type.Parameters[1].Type.GetDefinition() != "http.ResponseWriter" {
+		return false
+	}
+
+	if f.Type.Parameters[2].Type.GetDefinition() != "*http.Request" {
 		return false
 	}
 
 	return true
 }
-func findEchoImport(f humanize.File) (string, bool) {
-	for i := range f.Imports {
-		if f.Imports[i].Path == echoImportPath {
-			return "echo", true
-		}
-	}
-
-	return "", false
-}
 
 func (r *routerPlugin) FunctionIsSupported(file humanize.File, fn humanize.Function) bool {
-	str, b := findEchoImport(file)
-	if !b {
-		return false
-	}
-
-	return isMatched(str, fn)
+	return isMatched(fn)
 }
 
 func (r *routerPlugin) StructureIsSupported(file humanize.File, fn humanize.TypeName) bool {
