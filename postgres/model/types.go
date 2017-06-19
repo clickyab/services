@@ -56,17 +56,19 @@ type NullString struct {
 // GenericJSONField is used to handle generic json data in postgres
 type GenericJSONField map[string]interface{}
 
-func (gjs *GenericJSONField) MarshalJSON() ([]byte, error) {
-	return json.Marshal(map[string]interface{}(*gjs))
+// MarshalJSON try to save this into json
+func (gjf *GenericJSONField) MarshalJSON() ([]byte, error) {
+	return json.Marshal(map[string]interface{}(*gjf))
 }
 
-func (gjs *GenericJSONField) UnmarshalJSON(d []byte) error {
+// UnmarshalJSON try to unmarshal this from a json string
+func (gjf *GenericJSONField) UnmarshalJSON(d []byte) error {
 	tmp := make(map[string]interface{})
 	err := json.Unmarshal(d, &tmp)
 	if err != nil {
 		return err
 	}
-	*gjs = tmp
+	*gjf = tmp
 	return nil
 }
 
@@ -311,14 +313,17 @@ func (ns NullString) UnmarshalJSON(b []byte) error {
 	return nil
 }
 
+// JSONBWrapper is a simple type to handle postgres jsonb
 type JSONBWrapper struct {
 	inner interface{}
 }
 
+// MarshalJSON try to save it to json
 func (w *JSONBWrapper) MarshalJSON() ([]byte, error) {
 	return json.Marshal(w.inner)
 }
 
+// UnmarshalJSON try to load it from json
 func (w *JSONBWrapper) UnmarshalJSON(b []byte) error {
 	if w.inner == nil {
 		tmp := make(GenericJSONField)
@@ -327,10 +332,12 @@ func (w *JSONBWrapper) UnmarshalJSON(b []byte) error {
 	return json.Unmarshal(b, w.inner)
 }
 
+// Value try to return database friendly value
 func (w *JSONBWrapper) Value() (driver.Value, error) {
 	return json.Marshal(w.inner)
 }
 
+// Scan try to scan value from database
 func (w *JSONBWrapper) Scan(src interface{}) error {
 	var b []byte
 	switch src.(type) {

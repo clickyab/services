@@ -11,6 +11,7 @@ import (
 	"github.com/clickyab/services/config"
 	"github.com/clickyab/services/framework"
 	"github.com/clickyab/services/framework/middleware"
+	"github.com/clickyab/services/initializer"
 	"github.com/rs/cors"
 	"github.com/rs/xhandler"
 	"github.com/rs/xmux"
@@ -33,10 +34,10 @@ type Routes interface {
 	Routes(r *xmux.Mux, mountPoint string)
 }
 
-type initializer struct {
+type initer struct {
 }
 
-func (i *initializer) Initialize(ctx context.Context) {
+func (i *initer) Initialize(ctx context.Context) {
 	engine = xmux.New()
 	c := cors.New(cors.Options{
 		AllowOriginFunc: func(origin string) bool {
@@ -83,5 +84,5 @@ func Register(c ...Routes) {
 }
 
 func init() {
-	initializer.Register(&initializer{})
+	initializer.Register(&initer{}, 100)
 }

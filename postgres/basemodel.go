@@ -3,20 +3,19 @@ package postgres
 import (
 	"context"
 	"database/sql"
-	"sync"
 
 	"github.com/Sirupsen/logrus"
 	"github.com/clickyab/services/assert"
 	"github.com/clickyab/services/initializer"
 	"github.com/clickyab/services/postgres/model"
+	// Make sure postgres is included in any build
 	_ "github.com/lib/pq"
-	gorp "gopkg.in/gorp.v2" // Make sure postgres is included in any build
+	gorp "gopkg.in/gorp.v2"
 )
 
 var (
 	dbmap *gorp.DbMap
 	db    *sql.DB
-	once  = sync.Once{}
 	all   []initializer.Simple
 )
 
