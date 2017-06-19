@@ -81,3 +81,7 @@ func (i *initializer) Initialize(ctx context.Context) {
 func Register(c ...Routes) {
 	all = append(all, c...)
 }
+
+func init() {
+	initializer.Register(&initializer{})
+}
