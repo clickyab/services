@@ -9,7 +9,10 @@ import (
 	"github.com/clickyab/services/assert"
 	"github.com/clickyab/services/initializer"
 
+	"fmt"
+
 	"github.com/Sirupsen/logrus"
+	"github.com/clickyab/services/healthz"
 	gorp "gopkg.in/gorp.v2"
 )
 
@@ -70,6 +73,7 @@ func (in *initMysql) Initialize(ctx context.Context) {
 		for i := range all {
 			all[i].Initialize()
 		}
+		healthz.Register(in)
 		logrus.Debug("mysql is ready.")
 		go func() {
 			c := ctx.Done()
@@ -80,6 +84,18 @@ func (in *initMysql) Initialize(ctx context.Context) {
 			logrus.Debug("mysql finalized.")
 		}()
 	})
+}
+
+// Healthy return true if the databases are ok and ready for ping
+func (in *initMysql) Healthy(context.Context) error {
+	rErr := rdb.Ping()
+	wErr := wdb.Ping()
+
+	if rErr != nil || wErr != nil {
+		return fmt.Errorf("mysql PING failed, read error was %s and write error was %s", rErr, wErr)
+	}
+
+	return nil
 }
 
 // Manager is a base manager for transaction model
