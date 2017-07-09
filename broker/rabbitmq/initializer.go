@@ -9,6 +9,8 @@ import (
 	"github.com/clickyab/services/assert"
 	"github.com/clickyab/services/initializer"
 
+	"fmt"
+
 	"github.com/Sirupsen/logrus"
 	"github.com/streadway/amqp"
 )
@@ -136,12 +138,26 @@ var (
 )
 
 type initRabbit struct {
+	notifyCloser chan *amqp.Error
+}
+
+func (in *initRabbit) Healthy(context.Context) error {
+	select {
+	case err := <-in.notifyCloser:
+		if err != nil {
+			return fmt.Errorf("RabbitMQ error happen : %s", err)
+		}
+	default: // Do not block
+	}
+	return nil
 }
 
 // Initialize the module at the beginning of the application to create a publish channel
 func (in *initRabbit) Initialize(ctx context.Context) {
 
 	once.Do(func() {
+		// the size is here for channel to not block the caller. since we read this on the health check command
+		in.notifyCloser = make(chan *amqp.Error, 10)
 		kill, _ = context.WithCancel(ctx)
 		var err error
 		conn, err = amqp.Dial(cfg.DSN)
