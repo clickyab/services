@@ -27,7 +27,7 @@ type initRedis struct {
 // Healthy return true if the databases are ok and ready for ping
 func (initRedis) Healthy(context.Context) error {
 	ping, err := Client.Ping().Result()
-	if err != nil || strings.ToUpper(ping) == "PONG" {
+	if err != nil || strings.ToUpper(ping) != "PONG" {
 		return fmt.Errorf("Redis PING failed. result was '%s' and the error was %s", ping, err)
 	}
 
