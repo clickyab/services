@@ -5,6 +5,8 @@ import (
 	"os"
 	"regexp"
 
+	"time"
+
 	"github.com/clickyab/services/config"
 	"gopkg.in/fzerorubigd/onion.v3"
 )
@@ -12,11 +14,14 @@ import (
 var mysqlPattern = regexp.MustCompile("^mysql://([^:]+):([^@]+)@([^:]+):([0-9]+)/([a-zA-Z0-9-_]+)$")
 var (
 	wdsn              onion.String
-	rdsn              onion.String
+	rdsnSlice         onion.String
 	maxConnection     = config.RegisterInt("services.mysql.max_connection", 30, "max connection")
 	maxIdleConnection = config.RegisterInt("services.mysql.max_idle_connection", 5, "max idle connection")
 
-	develMode = config.RegisterBoolean("core.devel_mode", true, "development mode")
+	develMode   = config.RegisterBoolean("core.devel_mode", true, "development mode")
+	maxRdbRetry = config.RegisterDuration("services.mysql.max_retry_connection", time.Minute*15, "max times app should retry to get read connection")
+	// CD is cool down, the time needed to sleep after each update
+	rdbUpdateCD = config.RegisterDuration("services.mysql.max_retry_connection", time.Minute*2, "max times app should retry to get read connection")
 )
 
 func init() {
@@ -38,5 +43,5 @@ func init() {
 	}
 	dsn := fmt.Sprintf("%s:%s@tcp(%s:%s)/%s?charset=utf8&parseTime=true", user, pass, host, port, database)
 	wdsn = config.RegisterString("services.mysql.wdsn", dsn, "write database dsn")
-	rdsn = config.RegisterString("services.mysql.wdsn", dsn, "read database dsn")
+	rdsnSlice = config.RegisterString("services.mysql.rdsn", dsn, "read database dsn")
 }
