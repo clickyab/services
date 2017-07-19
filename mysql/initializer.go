@@ -50,8 +50,6 @@ func (in *initMysql) Initialize(ctx context.Context) {
 		assert.NotNil(factory)
 
 		uris := strings.Split(rdsnSlice.String(), ",")
-		err = fetchReadConnection(uris)
-		assert.Nil(err)
 
 		wdb, err = factory(wdsn.String())
 		assert.Nil(err)
@@ -92,10 +90,9 @@ func (in *initMysql) Initialize(ctx context.Context) {
 }
 
 func updateRdbMap(ctx context.Context, uris []string) {
-	ticker := time.NewTicker(rdbUpdateCD.Duration())
 	for {
 		select {
-		case <-ticker.C:
+		case <-time.After(rdbUpdateCD.Duration()):
 			safe.Try(func() error {
 				return fetchReadConnection(uris)
 			}, maxRdbRetry.Duration())
