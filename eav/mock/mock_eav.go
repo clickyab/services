@@ -94,7 +94,7 @@ func GetMockStore() map[string]map[string]string {
 	return res
 }
 
-// Reset the entire mock
-func Reset() {
+// ResetEav the entire mock
+func ResetEav() {
 	store = make(map[string]*Kiwi)
 }

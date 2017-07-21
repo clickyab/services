@@ -14,7 +14,7 @@ import (
 )
 
 func TestSpec(t *testing.T) {
-	Register(mock.NewMockStore)
+	RegisterEav(mock.NewMockStore)
 	Convey("Test keyvalue store", t, func() {
 		store := NewEavStore("test_key")
 		So(store.Key(), ShouldEqual, "test_key")
