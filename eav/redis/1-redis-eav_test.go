@@ -13,6 +13,7 @@ import (
 )
 
 func TestSpec(t *testing.T) {
+
 	config.Initialize("test", "test", "test")
 	defer initializer.Initialize()()
 
@@ -37,5 +38,5 @@ func TestSpec(t *testing.T) {
 
 	})
 
-	aredis.Client.Del("test_key")
+	aredis.Client.FlushAll()
 }
