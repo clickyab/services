@@ -1,46 +1,16 @@
 package rabbitmq
 
 import (
-	"os"
-
 	"time"
 
 	"github.com/clickyab/services/config"
 )
 
-var cfg cfgLoader
-
-type cfgLoader struct {
-	DSN        string        `onion:"dsn"`
-	Exchange   string        `onion:"exchange"`
-	Publisher  int           `onion:"publisher"`
-	ConfirmLen int           `onion:"confirm_len"`
-	Debug      bool          `onion:"debug"`
-	TryLimit   time.Duration `onion:"try_limit"`
-}
-
-func (cl *cfgLoader) Initialize() config.DescriptiveLayer {
-	d := config.NewDescriptiveLayer()
-	dsn := os.Getenv("RABBITMQ_URL")
-	if dsn == "" {
-		dsn = "amqp://server:bita123@127.0.0.1:5672/cy"
-	}
-	d.Add("amqp dsn", "service.amqp.dsn", dsn)
-	d.Add("amqp exchange to publish into", "service.amqp.exchange", "cy")
-	d.Add("amqp publisher to publish into", "service.ampq.publisher", 30)
-	d.Add("amqp confirm channel len", "service.amqp.confirm_len", 200)
-	d.Add("amqp debug mode", "service.amqp.debug", false)
-	d.Add("the limit to incremental try wait", "services.amqp.try_limit", time.Minute)
-	return d
-}
-
-func (cl *cfgLoader) Loaded() {
-	config.GetStruct("service.amqp", cl)
-	if cl.Publisher < 1 {
-		cl.Publisher = 1
-	}
-}
-
-func init() {
-	config.Register(&cfg)
-}
+var (
+	dsn        = config.RegisterString("services.amqp.dsn", "amqp://server:bita123@127.0.0.1:5672/cy", "amqp dsn")
+	exchange   = config.RegisterString("services.amqp.exchange", "cy", "amqp exchange to publish into")
+	publisher  = config.RegisterInt("services.ampq.publisher", 30, "amqp publisher to publish into")
+	confirmLen = config.RegisterInt("services.amqp.confirm_len", 200, "amqp confirm channel len")
+	debug      = config.RegisterBoolean("services.amqp.debug", false, "amqp debug mode")
+	tryLimit   = config.RegisterDuration("services.amqp.try_limit", time.Minute, "the limit to incremental try wait")
+)

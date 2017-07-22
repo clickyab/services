@@ -26,20 +26,20 @@ func (cn consumer) RegisterConsumer(consumer broker.Consumer) error {
 		return err
 	}
 	err = c.ExchangeDeclare(
-		cfg.Exchange, // name
-		"topic",      // type
-		true,         // durable
-		false,        // auto-deleted
-		false,        // internal
-		false,        // no-wait
-		nil,          // arguments
+		exchange.String(), // name
+		"topic",           // type
+		true,              // durable
+		false,             // auto-deleted
+		false,             // internal
+		false,             // no-wait
+		nil,               // arguments
 	)
 
 	if err != nil {
 		return err
 	}
 	qu := consumer.Queue()
-	if cfg.Debug {
+	if debug.Bool() {
 		qu = "debug." + qu
 	}
 	q, err := c.QueueDeclare(qu, true, false, false, false, nil)
@@ -59,13 +59,13 @@ func (cn consumer) RegisterConsumer(consumer broker.Consumer) error {
 	}
 
 	topic := consumer.Topic()
-	if cfg.Debug {
+	if debug.Bool() {
 		topic = "debug." + topic
 	}
 	err = c.QueueBind(
-		q.Name,       // queue name
-		topic,        // routing key
-		cfg.Exchange, // exchange
+		q.Name,            // queue name
+		topic,             // routing key
+		exchange.String(), // exchange
 		false,
 		nil,
 	)

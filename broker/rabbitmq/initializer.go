@@ -162,9 +162,9 @@ func (in *initRabbit) Initialize(ctx context.Context) {
 		kill, _ = context.WithCancel(ctx)
 		safe.Try(func() error {
 			var err error
-			conn, err = amqp.Dial(cfg.DSN)
+			conn, err = amqp.Dial(dsn.String())
 			return err
-		}, cfg.TryLimit)
+		}, tryLimit.Duration())
 
 		chn, err := conn.Channel()
 		assert.Nil(err)
@@ -172,7 +172,7 @@ func (in *initRabbit) Initialize(ctx context.Context) {
 
 		assert.Nil(
 			chn.ExchangeDeclare(
-				cfg.Exchange,
+				exchange.String(),
 				"topic",
 				true,
 				false,
@@ -182,11 +182,11 @@ func (in *initRabbit) Initialize(ctx context.Context) {
 			),
 		)
 
-		rng = ring.New(cfg.Publisher)
-		for i := 0; i < cfg.Publisher; i++ {
+		rng = ring.New(publisher.Int())
+		for i := 0; i < publisher.Int(); i++ {
 			pchn, err := conn.Channel()
 			assert.Nil(err)
-			rtrn := make(chan amqp.Confirmation, cfg.ConfirmLen)
+			rtrn := make(chan amqp.Confirmation, confirmLen.Int())
 			err = pchn.Confirm(false)
 			assert.Nil(err)
 			pchn.NotifyPublish(rtrn)

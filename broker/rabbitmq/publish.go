@@ -61,16 +61,16 @@ func (consumer) Publish(in broker.Job) {
 		}
 	}()
 	topic := in.Topic()
-	if cfg.Debug {
+	if debug.Bool() {
 		topic = "debug." + topic
 	}
-	err = v.chn.Publish(cfg.Exchange, topic, true, false, pub)
+	err = v.chn.Publish(exchange.String(), topic, true, false, pub)
 }
 
 // FinalizeWait is a function to wait for all publication to finish. after calling this,
 // must not call the PublishEvent
 func finalizeWait() {
-	for i := 0; i < cfg.Publisher; i++ {
+	for i := 0; i < publisher.Int(); i++ {
 		rng = rng.Next()
 		v := rng.Value.(*chnlLock)
 		v.lock.Lock()
