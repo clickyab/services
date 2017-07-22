@@ -4,30 +4,27 @@ import (
 	"context"
 	"database/sql"
 	"errors"
-	"sync"
-
-	"github.com/clickyab/services/assert"
-	"github.com/clickyab/services/initializer"
-
 	"fmt"
+	"math/rand"
+	"sync"
+	"time"
 
 	"strings"
 
-	"math/rand"
-
-	"time"
-
 	"github.com/Sirupsen/logrus"
+	"github.com/clickyab/services/assert"
 	"github.com/clickyab/services/healthz"
+	"github.com/clickyab/services/initializer"
 	"github.com/clickyab/services/safe"
 	gorp "gopkg.in/gorp.v2"
 )
 
 var (
-	rdbmap  []*gorp.DbMap
-	wdbmap  *gorp.DbMap
-	rdb     []*sql.DB
-	wdb     *sql.DB
+	rdbmap   []*gorp.DbMap
+	safeRead []*gorp.DbMap
+	safeLock = sync.RWMutex{}
+	wdbmap   *gorp.DbMap
+
 	once    = sync.Once{}
 	all     []Initializer
 	factory func(string) (*sql.DB, error)
@@ -43,113 +40,115 @@ func (g gorpLogger) Printf(format string, v ...interface{}) {
 	logrus.Debugf(format, v...)
 }
 
+func createDBMap(dsn, mark string) *gorp.DbMap {
+	db, err := factory(dsn)
+	assert.Nil(err)
+
+	db.SetMaxIdleConns(maxIdleConnection.Int())
+	db.SetMaxOpenConns(maxConnection.Int())
+
+	dbmap := &gorp.DbMap{Db: db, Dialect: gorp.MySQLDialect{}}
+	if develMode.Bool() {
+		logger := gorpLogger{}
+		dbmap.TraceOn(mark, logger)
+	} else {
+		dbmap.TraceOff()
+	}
+
+	return dbmap
+}
+
+func ping(db ...*gorp.DbMap) error {
+	for i := range db {
+		err := db[i].Db.Ping()
+		if err != nil {
+			logrus.Error(err)
+			continue
+		}
+		return nil // just one active connection is fine
+	}
+	return fmt.Errorf("all %d ping(s) failed", len(db))
+}
+
 // Initialize the modules, its safe to call this as many time as you want.
 func (in *initMysql) Initialize(ctx context.Context) {
 	once.Do(func() {
-		var err error
 		assert.NotNil(factory)
 
-		uris := strings.Split(rdsnSlice.String(), ",")
+		wdbmap = createDBMap(wdsn.String(), "[wdb]")
+		safe.Try(func() error { return ping(wdbmap) }, retryMax.Duration())
 
-		wdb, err = factory(wdsn.String())
-		assert.Nil(err)
-
-		wdb.SetMaxIdleConns(maxIdleConnection.Int())
-		wdb.SetMaxOpenConns(maxConnection.Int())
-
-		err = wdb.Ping()
-		assert.Nil(err)
-
-		wdbmap = &gorp.DbMap{Db: wdb, Dialect: gorp.MySQLDialect{}}
-
-		if develMode.Bool() {
-			logger := gorpLogger{}
-			wdbmap.TraceOn("[wdb]", logger)
-		} else {
-			wdbmap.TraceOff()
+		rdsns := strings.Split(rdsnSlice.String(), ",")
+		if len(rdsns) == 0 {
+			logrus.Warn("No read db is configured. using write as read")
+			rdsns = append(rdsns, wdsn.String()) // Add write as read source if there is no read source
 		}
 
+		for i := range rdsns {
+			tmpDBMap := createDBMap(rdsns[i], fmt.Sprintf("[rdb%d]", i+1))
+			rdbmap = append(rdbmap, tmpDBMap)
+		}
+		safe.Try(func() error { return ping(rdbmap...) }, retryMax.Duration())
+
+		safe.GoRoutine(func() { updateRdbMap(ctx) })
+
+		// Now that all initialization are done, lets initialize our modules
 		for i := range all {
 			all[i].Initialize()
 		}
+
 		healthz.Register(in)
 		logrus.Debug("mysql is ready.")
 		go func() {
 			c := ctx.Done()
 			assert.NotNil(c, "[BUG] context has no mean to cancel/deadline/timeout")
 			<-c
-			for _, i := range rdb {
-				assert.Nil(i.Close())
+			for _, i := range rdbmap {
+				_ = i.Db.Close()
 			}
-			assert.Nil(wdb.Close())
+			wdbmap.Db.Close()
 			logrus.Debug("mysql finalized.")
 		}()
-
-		go updateRdbMap(ctx, uris)
 	})
 }
 
-func updateRdbMap(ctx context.Context, uris []string) {
+func updateRdbMap(ctx context.Context) {
 	for {
 		select {
 		case <-time.After(rdbUpdateCD.Duration()):
-			safe.Try(func() error {
-				return fetchReadConnection(uris)
-			}, maxRdbRetry.Duration())
-
+			fillSafeArray()
 		case <-ctx.Done():
-			break
+			return
 		}
-
 	}
 }
 
-func fetchReadConnection(uris []string) error {
-	rdbmap = []*gorp.DbMap{}
-	rdb = []*sql.DB{}
-	for _, i := range uris {
-		r, err := factory(i)
-		if err != nil {
-			continue
+func fillSafeArray() {
+	tmp := []*gorp.DbMap{}
+	for i := range rdbmap {
+		if err := ping(rdbmap[i]); err == nil {
+			tmp = append(tmp, rdbmap[i])
 		}
-
-		r.SetMaxIdleConns(maxIdleConnection.Int())
-		r.SetMaxOpenConns(maxConnection.Int())
-
-		err = r.Ping()
-		if err != nil {
-			continue
-		}
-
-		currentRdbmap := &gorp.DbMap{Db: r, Dialect: gorp.MySQLDialect{}}
-
-		if develMode.Bool() {
-			logger := gorpLogger{}
-			currentRdbmap.TraceOn("[rdb]", logger)
-		} else {
-			currentRdbmap.TraceOff()
-		}
-
-		rdbmap = append(rdbmap, currentRdbmap)
-		rdb = append(rdb, r)
 	}
-	if len(rdbmap) < 1 {
-		return errors.New("all read databases are down")
+	fail := len(tmp) == 0
+	if fail { // heck! no read available? fallback to write
+		tmp = append(tmp, wdbmap)
 	}
-	return nil
+
+	// simply return if there is no change. prevent useless lock
+	if !fail && (len(tmp) == len(rdbmap)) {
+		return
+	}
+	safeLock.Lock()
+	defer safeLock.Unlock()
+
+	safeRead = tmp
 }
 
 // Healthy return true if the databases are ok and ready for ping
 func (in *initMysql) Healthy(context.Context) error {
-	var rErr error
-	for _, i := range rdb {
-		rErr = i.Ping()
-		if rErr != nil {
-			break
-		}
-	}
-
-	wErr := wdb.Ping()
+	rErr := ping(rdbmap...)
+	wErr := ping(wdbmap)
 
 	if rErr != nil || wErr != nil {
 		return fmt.Errorf("mysql PING failed, read error was %s and write error was %s", rErr, wErr)
@@ -160,12 +159,7 @@ func (in *initMysql) Healthy(context.Context) error {
 
 // Manager is a base manager for transaction model
 type Manager struct {
-	tx     *gorp.Transaction
-	rdbmap []*gorp.DbMap
-	rdb    []*sql.DB
-	wdbmap *gorp.DbMap
-	wdb    *sql.DB
-
+	tx          *gorp.Transaction
 	transaction bool
 }
 
@@ -180,8 +174,7 @@ func (m *Manager) Begin() error {
 	if m.transaction {
 		logrus.Panic("already in transaction")
 	}
-	m.sureDbMap()
-	m.tx, err = m.wdbmap.Begin()
+	m.tx, err = wdbmap.Begin()
 	if err == nil {
 		m.transaction = true
 	}
@@ -217,31 +210,19 @@ func (m *Manager) Rollback() error {
 	return nil
 }
 
-func (m *Manager) sureDbMap() {
-	if m.rdbmap == nil || m.wdbmap == nil {
-		m.rdbmap = rdbmap
-		m.wdbmap = wdbmap
-	}
-}
-
 // GetRDbMap is for getting the current dbmap
 func (m *Manager) GetRDbMap() gorp.SqlExecutor {
 	if m.transaction {
 		return m.tx
 	}
-	m.sureDbMap()
-	index := rand.Intn(len(rdbmap))
-	return m.rdbmap[index]
+	index := rand.Intn(len(safeRead))
+	return safeRead[index]
 }
 
 // GetRSQLDB return the raw connection to database
 func (m *Manager) GetRSQLDB() *sql.DB {
-	if m.rdb == nil {
-		m.rdb = rdb
-	}
-
-	index := rand.Intn(len(rdb))
-	return m.rdb[index]
+	index := rand.Intn(len(safeRead))
+	return safeRead[index].Db
 }
 
 // GetWDbMap is for getting the current dbmap
@@ -249,17 +230,12 @@ func (m *Manager) GetWDbMap() gorp.SqlExecutor {
 	if m.transaction {
 		return m.tx
 	}
-	m.sureDbMap()
-	return m.wdbmap
+	return wdbmap
 }
 
 // GetWSQLDB return the raw connection to database
 func (m *Manager) GetWSQLDB() *sql.DB {
-	if m.wdb == nil {
-		m.wdb = wdb
-	}
-
-	return m.wdb
+	return wdbmap.Db
 }
 
 // GetProperDBMap try to get the current writer for development mode
@@ -294,29 +270,25 @@ func (m *Manager) Hijack(ts gorp.SqlExecutor) error {
 // This operation is idempotent. If i's type is already mapped, the
 // existing *TableMap is returned
 func (m *Manager) AddTable(i interface{}) *gorp.TableMap {
-	m.sureDbMap()
-	return m.wdbmap.AddTable(i)
+	return wdbmap.AddTable(i)
 }
 
 // AddTableWithName has the same behavior as AddTable, but sets
 // table.TableName to name.
 func (m *Manager) AddTableWithName(i interface{}, name string) *gorp.TableMap {
-	m.sureDbMap()
-	return m.wdbmap.AddTableWithName(i, name)
+	return wdbmap.AddTableWithName(i, name)
 }
 
 // AddTableWithNameAndSchema has the same behavior as AddTable, but sets
 // table.TableName to name.
 func (m *Manager) AddTableWithNameAndSchema(i interface{}, schema string, name string) *gorp.TableMap {
-	m.sureDbMap()
-	return m.wdbmap.AddTableWithNameAndSchema(i, schema, name)
+	return wdbmap.AddTableWithNameAndSchema(i, schema, name)
 }
 
 // TruncateTables try to truncate tables , useful for tests
 func (m *Manager) TruncateTables(tbl string) error {
-	m.sureDbMap()
 	q := "TRUNCATE " + tbl
-	_, err := m.wdbmap.Exec(q)
+	_, err := wdbmap.Exec(q)
 	return err
 }
 
