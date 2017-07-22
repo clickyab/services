@@ -13,6 +13,7 @@ import (
 
 	"github.com/Sirupsen/logrus"
 	"github.com/clickyab/services/healthz"
+	"github.com/clickyab/services/safe"
 	redis "gopkg.in/redis.v5"
 )
 
@@ -46,7 +47,8 @@ func (i *initRedis) Initialize(ctx context.Context) {
 		},
 	)
 	// PING the server to make sure every thing is fine
-	assert.Nil(Client.Ping().Err())
+	safe.Try(func() error { return Client.Ping().Err() }, tryLimit.Duration())
+
 	healthz.Register(i)
 	logrus.Debug("redis is ready.")
 	go func() {

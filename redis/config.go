@@ -9,6 +9,8 @@ import (
 
 	"fmt"
 
+	"time"
+
 	"gopkg.in/fzerorubigd/onion.v3"
 )
 
@@ -20,6 +22,7 @@ var (
 	password onion.String
 	poolsize onion.Int
 	db       onion.Int
+	tryLimit = config.RegisterDuration("services.redis.try_limit", time.Minute, "the limit to incremental try wait")
 )
 
 func init() {
