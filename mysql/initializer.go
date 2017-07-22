@@ -90,6 +90,7 @@ func (in *initMysql) Initialize(ctx context.Context) {
 		}
 		safe.Try(func() error { return ping(rdbmap...) }, retryMax.Duration())
 
+		fillSafeArray()
 		safe.GoRoutine(func() { updateRdbMap(ctx) })
 
 		// Now that all initialization are done, lets initialize our modules
