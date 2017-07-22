@@ -102,6 +102,7 @@ func Try(a func() error, max time.Duration, extra ...interface{}) {
 		if err == nil {
 			return
 		}
+		logrus.Error(err)
 		t := time.Duration(x) * time.Second
 		if t < max {
 			x, y = y, x+y

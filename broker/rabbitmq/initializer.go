@@ -12,6 +12,7 @@ import (
 	"fmt"
 
 	"github.com/Sirupsen/logrus"
+	"github.com/clickyab/services/safe"
 	"github.com/streadway/amqp"
 )
 
@@ -159,9 +160,12 @@ func (in *initRabbit) Initialize(ctx context.Context) {
 		// the size is here for channel to not block the caller. since we read this on the health check command
 		in.notifyCloser = make(chan *amqp.Error, 10)
 		kill, _ = context.WithCancel(ctx)
-		var err error
-		conn, err = amqp.Dial(cfg.DSN)
-		assert.Nil(err)
+		safe.Try(func() error {
+			var err error
+			conn, err = amqp.Dial(cfg.DSN)
+			return err
+		}, cfg.TryLimit)
+
 		chn, err := conn.Channel()
 		assert.Nil(err)
 		defer chn.Close()

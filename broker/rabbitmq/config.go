@@ -3,17 +3,20 @@ package rabbitmq
 import (
 	"os"
 
+	"time"
+
 	"github.com/clickyab/services/config"
 )
 
 var cfg cfgLoader
 
 type cfgLoader struct {
-	DSN        string `onion:"dsn"`
-	Exchange   string `onion:"exchange"`
-	Publisher  int    `onion:"publisher"`
-	ConfirmLen int    `onion:"confirm_len"`
-	Debug      bool   `onion:"debug"`
+	DSN        string        `onion:"dsn"`
+	Exchange   string        `onion:"exchange"`
+	Publisher  int           `onion:"publisher"`
+	ConfirmLen int           `onion:"confirm_len"`
+	Debug      bool          `onion:"debug"`
+	TryLimit   time.Duration `onion:"try_limit"`
 }
 
 func (cl *cfgLoader) Initialize() config.DescriptiveLayer {
@@ -27,6 +30,7 @@ func (cl *cfgLoader) Initialize() config.DescriptiveLayer {
 	d.Add("amqp publisher to publish into", "service.ampq.publisher", 30)
 	d.Add("amqp confirm channel len", "service.amqp.confirm_len", 200)
 	d.Add("amqp debug mode", "service.amqp.debug", false)
+	d.Add("the limit to incremental try wait", "services.amqp.try_limit", time.Minute)
 	return d
 }
 

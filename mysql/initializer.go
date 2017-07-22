@@ -134,9 +134,9 @@ func fillSafeArray() {
 	if fail { // heck! no read available? fallback to write
 		tmp = append(tmp, wdbmap)
 	}
-
+	x := len(tmp)
 	// simply return if there is no change. prevent useless lock
-	if !fail && (len(tmp) == len(rdbmap)) {
+	if !fail && (len(rdbmap) == x && len(safeRead) == x) {
 		return
 	}
 	safeLock.Lock()
@@ -215,12 +215,18 @@ func (m *Manager) GetRDbMap() gorp.SqlExecutor {
 	if m.transaction {
 		return m.tx
 	}
+	safeLock.RLock()
+	defer safeLock.RUnlock()
+
 	index := rand.Intn(len(safeRead))
 	return safeRead[index]
 }
 
 // GetRSQLDB return the raw connection to database
 func (m *Manager) GetRSQLDB() *sql.DB {
+	safeLock.RLock()
+	defer safeLock.RUnlock()
+
 	index := rand.Intn(len(safeRead))
 	return safeRead[index].Db
 }
