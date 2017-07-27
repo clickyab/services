@@ -24,17 +24,17 @@ func (cfg *configInitializer) Initialize() config.DescriptiveLayer {
 		dsn = "postgres://postgres:bita123@localhost/malooch"
 	}
 	dsn += "?sslmode=disable"
-	d.Add("postgres DSN", "service.postgres.dsn", dsn)
-	d.Add("postgres maximum connection", "service.postgres.max_connection", 150)
-	d.Add("postgres max idle connection", "service.postgres.max_idle_connection", 10)
+	d.Add("postgres DSN", "services.postgres.dsn", dsn)
+	d.Add("postgres maximum connection", "services.postgres.max_connection", 150)
+	d.Add("postgres max idle connection", "services.postgres.max_idle_connection", 10)
 
 	return d
 }
 
 func (cfg *configInitializer) Loaded() {
-	cfg.DSN = config.GetString("service.postgres.dsn")
-	cfg.MaxConnection = config.GetInt("service.postgres.max_connection")
-	cfg.MaxIdleConnection = config.GetInt("service.postgres.max_idle_connection")
+	cfg.DSN = config.GetString("services.postgres.dsn")
+	cfg.MaxConnection = config.GetInt("services.postgres.max_connection")
+	cfg.MaxIdleConnection = config.GetInt("services.postgres.max_idle_connection")
 	cfg.DevelMode = config.GetBool("core.devel_mode")
 }
 
