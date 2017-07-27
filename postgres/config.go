@@ -2,6 +2,7 @@ package postgres
 
 import (
 	"os"
+	"time"
 
 	"github.com/clickyab/services/config"
 )
@@ -13,6 +14,8 @@ type configInitializer struct {
 
 	DevelMode bool
 }
+
+var retryMax = config.RegisterDuration("services.postgres.max_retry_connection", time.Minute, "max time app should fallback to get mysql connection")
 
 var cfg configInitializer
 
