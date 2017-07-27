@@ -1,5 +1,6 @@
 package postgres
 
+// TODO : multi connection support
 import (
 	"context"
 	"database/sql"
@@ -9,6 +10,7 @@ import (
 	"github.com/clickyab/services/initializer"
 	"github.com/clickyab/services/postgres/model"
 	// Make sure postgres is included in any build
+	"github.com/fzerorubigd/lib/safe"
 	_ "github.com/lib/pq"
 	gorp "gopkg.in/gorp.v2"
 )
@@ -31,6 +33,10 @@ type gorpLogger struct {
 type modelsInitializer struct {
 }
 
+func (modelsInitializer) Healthy(context.Context) error {
+	return db.Ping()
+}
+
 func (g gorpLogger) Printf(format string, v ...interface{}) {
 	logrus.Debugf(format, v...)
 }
@@ -43,8 +49,8 @@ func (modelsInitializer) Initialize(ctx context.Context) {
 
 	db.SetMaxIdleConns(cfg.MaxIdleConnection)
 	db.SetMaxOpenConns(cfg.MaxConnection)
-	err = db.Ping()
-	assert.Nil(err)
+
+	safe.Try(db.Ping, retryMax.Duration())
 
 	dbmap = &gorp.DbMap{Db: db, Dialect: gorp.PostgresDialect{}}
 
