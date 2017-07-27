@@ -69,6 +69,7 @@ import (
 	"github.com/clickyab/services/initializer"
 	"github.com/rs/xhandler"
 	"github.com/rs/xmux"
+	"cerulean.ir/goapp/modules/user/middleware"
 )
 
 
@@ -91,8 +92,8 @@ func ({{ .GroupRec }} *{{ .StructName }}) Routes(r *xmux.Mux, mountPoint string)
 		{{end}}
 	}...)
 	{{ if $route.Resource }}
-	base.RegisterPermission("{{$route.Resource}}", "{{$route.Resource}}")
-	m{{ $key }} = append(m{{ $key }}, authz.AuthorizeGenerator("{{$route.Resource}}",base.UserScope("{{$route.Scope}}"))){{ end }}
+	permission.Register("{{$route.Resource}}", "{{$route.Resource}}")
+	m{{ $key }} = append(m{{ $key }}, authz.AuthorizeGenerator("{{$route.Resource}}","{{$route.Scope}}")){{ end }}
 	{{ if $route.RouteFuncMiddleware }}
 	m{{ $key }} = append(m{{ $key }}, {{ $.GroupRec }}.{{ $route.RouteFuncMiddleware|strip_type }}()...){{ end }}
 	{{ if $route.Payload }} // Make sure payload is the last middleware
