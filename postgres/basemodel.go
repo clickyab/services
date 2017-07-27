@@ -88,16 +88,16 @@ func (modelsInitializer) Initialize(ctx context.Context) {
 }
 
 func doMigration() {
-	if startupMigration.Bool() {
-		// its time for migration
-		n, err := migration.Do(model.Manager{}, migration.Up, 0)
-		if err != nil {
-			logrus.Errorf("Migration failed! the error was: %s", err)
-			logrus.Error("This continue to run, but someone must check this!")
-		} else {
-			logrus.Info("%d migration applied", n)
-		}
-	}
+	//if startupMigration.Bool() {
+	//	// its time for migration
+	//	n, err := migration.Do(model.Manager{}, migration.Up, 0)
+	//	if err != nil {
+	//		logrus.Errorf("Migration failed! the error was: %s", err)
+	//		logrus.Error("This continue to run, but someone must check this!")
+	//	} else {
+	//		logrus.Info("%d migration applied", n)
+	//	}
+	//}
 	if cfg.DevelMode {
 		migration.List(model.Manager{}, os.Stdout)
 	}
