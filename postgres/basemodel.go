@@ -15,7 +15,6 @@ import (
 	"github.com/fzerorubigd/lib/migration"
 	"github.com/fzerorubigd/lib/safe"
 	_ "github.com/lib/pq"
-	"github.com/rubenv/sql-migrate"
 	gorp "gopkg.in/gorp.v2"
 )
 
@@ -91,7 +90,7 @@ func (modelsInitializer) Initialize(ctx context.Context) {
 func doMigration() {
 	if startupMigration.Bool() {
 		// its time for migration
-		n, err := migration.Do(model.Manager{}, migrate.Up, 0)
+		n, err := migration.Do(model.Manager{}, migration.Up, 0)
 		if err != nil {
 			logrus.Errorf("Migration failed! the error was: %s", err)
 			logrus.Error("This continue to run, but someone must check this!")

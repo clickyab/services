@@ -162,7 +162,7 @@ func fillSafeArray() {
 func doMigration() {
 	if startupMigration.Bool() {
 		// its time for migration
-		n, err := migration.Do(migrationManager{}, migrate.Up, 0)
+		n, err := migration.Do(migrationManager{}, migration.Up, 0)
 		if err != nil {
 			logrus.Errorf("Migration failed! the error was: %s", err)
 			logrus.Error("This continue to run, but someone must check this!")
