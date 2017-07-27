@@ -6,6 +6,7 @@ import (
 	"errors"
 	"fmt"
 	"math/rand"
+	"os"
 	"sync"
 	"time"
 
@@ -34,6 +35,17 @@ type initMysql struct {
 }
 
 type gorpLogger struct {
+}
+
+type migrationManager struct {
+}
+
+func (migrationManager) GetSQLDB() *sql.DB {
+	return wdbmap.Db
+}
+
+func (migrationManager) GetDialect() string {
+	return "mysql"
 }
 
 func (g gorpLogger) Printf(format string, v ...interface{}) {
@@ -93,6 +105,7 @@ func (in *initMysql) Initialize(ctx context.Context) {
 		fillSafeArray()
 		safe.GoRoutine(func() { updateRdbMap(ctx) })
 
+		doMigration()
 		// Now that all initialization are done, lets initialize our modules
 		for i := range all {
 			all[i].Initialize()
@@ -144,6 +157,22 @@ func fillSafeArray() {
 	defer safeLock.Unlock()
 
 	safeRead = tmp
+}
+
+func doMigration() {
+	if startupMigration.Bool() {
+		// its time for migration
+		n, err := migration.Do(migrationManager{}, migrate.Up, 0)
+		if err != nil {
+			logrus.Errorf("Migration failed! the error was: %s", err)
+			logrus.Error("This continue to run, but someone must check this!")
+		} else {
+			logrus.Info("%d migration applied", n)
+		}
+	}
+	if develMode.Bool() {
+		migration.List(migrationManager{}, os.Stdout)
+	}
 }
 
 // Healthy return true if the databases are ok and ready for ping

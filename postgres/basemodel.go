@@ -10,8 +10,12 @@ import (
 	"github.com/clickyab/services/initializer"
 	"github.com/clickyab/services/postgres/model"
 	// Make sure postgres is included in any build
+	"os"
+
+	"github.com/fzerorubigd/lib/migration"
 	"github.com/fzerorubigd/lib/safe"
 	_ "github.com/lib/pq"
+	"github.com/rubenv/sql-migrate"
 	gorp "gopkg.in/gorp.v2"
 )
 
@@ -61,6 +65,8 @@ func (modelsInitializer) Initialize(ctx context.Context) {
 		dbmap.TraceOff()
 	}
 	model.Initialize(db, dbmap)
+	doMigration()
+
 	for i := range all {
 		all[i].Initialize()
 
@@ -80,6 +86,22 @@ func (modelsInitializer) Initialize(ctx context.Context) {
 		logrus.Debug("postgres finalized")
 	}()
 	logrus.Debug("postgres is ready")
+}
+
+func doMigration() {
+	if startupMigration.Bool() {
+		// its time for migration
+		n, err := migration.Do(model.Manager{}, migrate.Up, 0)
+		if err != nil {
+			logrus.Errorf("Migration failed! the error was: %s", err)
+			logrus.Error("This continue to run, but someone must check this!")
+		} else {
+			logrus.Info("%d migration applied", n)
+		}
+	}
+	if cfg.DevelMode {
+		migration.List(model.Manager{}, os.Stdout)
+	}
 }
 
 // Register a new initializer module

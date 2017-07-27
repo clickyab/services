@@ -83,6 +83,11 @@ func (m *Manager) GetSQLDB() *sql.DB {
 	return db
 }
 
+// GetDialect return the dialect of this instance
+func (m *Manager) GetDialect() string {
+	return "postgres"
+}
+
 // Hijack try to hijack into a transaction
 func (m *Manager) Hijack(ts gorp.SqlExecutor) error {
 	if m.transaction {
