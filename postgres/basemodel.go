@@ -99,7 +99,7 @@ func doMigration() {
 	//	}
 	//}
 	if cfg.DevelMode {
-		migration.List(model.Manager{}, os.Stdout)
+		migration.List(&model.Manager{}, os.Stdout)
 	}
 }
 
