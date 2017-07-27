@@ -336,9 +336,6 @@ const base = `
 package {{ .PackageName }}
 
 import (
-	"services/postgres"
-	"services/postgres/model"
-
 	"gopkg.in/gorp.v2"
 )
 const ({{ range $m := .Data }}

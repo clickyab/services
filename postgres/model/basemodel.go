@@ -18,9 +18,7 @@ var (
 
 // Manager is a base manager for transaction model
 type Manager struct {
-	tx    *gorp.Transaction
-	dbmap *gorp.DbMap
-	db    *sql.DB
+	tx *gorp.Transaction
 
 	transaction bool
 }
@@ -36,8 +34,7 @@ func (m *Manager) Begin() error {
 	if m.transaction {
 		logrus.Panic("already in transaction")
 	}
-	m.sureDbMap()
-	m.tx, err = m.dbmap.Begin()
+	m.tx, err = dbmap.Begin()
 	if err == nil {
 		m.transaction = true
 	}
@@ -73,28 +70,17 @@ func (m *Manager) Rollback() error {
 	return nil
 }
 
-func (m *Manager) sureDbMap() {
-	if m.dbmap == nil {
-		m.dbmap = dbmap
-	}
-}
-
 // GetDbMap is for getting the current dbmap
 func (m *Manager) GetDbMap() gorp.SqlExecutor {
 	if m.transaction {
 		return m.tx
 	}
-	m.sureDbMap()
-	return m.dbmap
+	return dbmap
 }
 
 // GetSQLDB return the raw connection to database
 func (m *Manager) GetSQLDB() *sql.DB {
-	if m.db == nil {
-		m.db = db
-	}
-
-	return m.db
+	return db
 }
 
 // Hijack try to hijack into a transaction
@@ -121,27 +107,23 @@ func (m *Manager) Hijack(ts gorp.SqlExecutor) error {
 // This operation is idempotent. If i's type is already mapped, the
 // existing *TableMap is returned
 func (m *Manager) AddTable(i interface{}) *gorp.TableMap {
-	m.sureDbMap()
-	return m.dbmap.AddTable(i)
+	return dbmap.AddTable(i)
 }
 
 // AddTableWithName has the same behavior as AddTable, but sets
 // table.TableName to name.
 func (m *Manager) AddTableWithName(i interface{}, name string) *gorp.TableMap {
-	m.sureDbMap()
-	return m.dbmap.AddTableWithName(i, name)
+	return dbmap.AddTableWithName(i, name)
 }
 
 // AddTableWithNameAndSchema has the same behavior as AddTable, but sets
 // table.TableName to name.
 func (m *Manager) AddTableWithNameAndSchema(i interface{}, schema string, name string) *gorp.TableMap {
-	m.sureDbMap()
-	return m.dbmap.AddTableWithNameAndSchema(i, schema, name)
+	return dbmap.AddTableWithNameAndSchema(i, schema, name)
 }
 
 // TruncateTables try to truncate tables , useful for tests
 func (m *Manager) TruncateTables(cascade, resetIdentity bool, tbl ...string) error {
-	m.sureDbMap()
 	q := "TRUNCATE " + strings.Join(tbl, " , ")
 	if resetIdentity {
 		q += " RESTART IDENTITY "
@@ -150,7 +132,7 @@ func (m *Manager) TruncateTables(cascade, resetIdentity bool, tbl ...string) err
 		q += " CASCADE "
 	}
 
-	_, err := m.dbmap.Exec(q)
+	_, err := dbmap.Exec(q)
 	return err
 }
 
