@@ -1,16 +1,13 @@
 package migration
 
 import (
-	"sort"
-
 	"database/sql"
-
-	"io"
-
 	"fmt"
+	"io"
+	"sort"
 	"text/tabwriter"
 
-	"github.com/rubenv/sql-migrate"
+	"github.com/fzerorubigd/sql-migrate"
 )
 
 var all multiAsset
@@ -22,6 +19,16 @@ type Manager interface {
 	// GetDialect must return the dialect
 	GetDialect() string
 }
+
+// Direction is a helper to prevent import the migration library in other packages
+type Direction int
+
+const (
+	// Up means migrate up
+	Up Direction = iota
+	// Down means migrate down
+	Down
+)
 
 type byId []*migrate.Migration
 
@@ -55,15 +62,15 @@ func Register(asset func(path string) ([]byte, error), assetDir func(path string
 
 // Do is my try to migrate on demand. but I don't know if there is more than
 // one instance is in memory and if that make trouble
-func Do(db Manager, dir migrate.MigrationDirection, max int) (int, error) {
+func Do(db Manager, dir Direction, max int) (int, error) {
 	var (
 		err error
 		n   int
 	)
 	if max == 0 {
-		n, err = migrate.Exec(db.GetSQLDB(), db.GetDialect(), all, dir)
+		n, err = migrate.Exec(db.GetSQLDB(), db.GetDialect(), all, migrate.MigrationDirection(dir))
 	} else {
-		n, err = migrate.ExecMax(db.GetSQLDB(), db.GetDialect(), all, dir, max)
+		n, err = migrate.ExecMax(db.GetSQLDB(), db.GetDialect(), all, migrate.MigrationDirection(dir), max)
 	}
 	if err != nil {
 		return 0, err
