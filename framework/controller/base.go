@@ -31,19 +31,17 @@ type ErrorResponseSimple struct {
 }
 
 // BadResponse is 400 request
-func (b Base) BadResponse(w http.ResponseWriter, err error) error {
+func (b Base) BadResponse(w http.ResponseWriter, err error) {
 	b.JSON(w, http.StatusBadRequest, ErrorResponseSimple{Error: trans.EE(err)})
-	return err
 }
 
 // ForbiddenResponse is 403 request
-func (b Base) ForbiddenResponse(w http.ResponseWriter, err error) error {
+func (b Base) ForbiddenResponse(w http.ResponseWriter, err error) {
 	b.JSON(w, http.StatusForbidden, ErrorResponseSimple{Error: trans.EE(err)})
-	return err
 }
 
 // NotFoundResponse is 404 request
-func (b Base) NotFoundResponse(w http.ResponseWriter, err error) error {
+func (b Base) NotFoundResponse(w http.ResponseWriter, err error) {
 	var res = ErrorResponseSimple{}
 	if err != nil {
 		res.Error = trans.EE(err)
@@ -52,18 +50,14 @@ func (b Base) NotFoundResponse(w http.ResponseWriter, err error) error {
 	}
 	w.Header().Add("error", res.Error.Error())
 	b.JSON(w, http.StatusNotFound, res)
-
-	return res.Error
 }
 
 // OKResponse is 200 request
-func (b Base) OKResponse(w http.ResponseWriter, res interface{}) error {
+func (b Base) OKResponse(w http.ResponseWriter, res interface{}) {
 	if res == nil {
 		res = NormalResponse{}
 	}
 	b.JSON(w, http.StatusOK, res)
-
-	return nil
 }
 
 // MustGetPayload is for payload middleware
