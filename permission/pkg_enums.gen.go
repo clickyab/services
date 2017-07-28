@@ -5,8 +5,8 @@ package permission
 import (
 	"database/sql/driver"
 
-	"github.com/fzerorubigd/lib/array"
-	"github.com/fzerorubigd/lib/trans"
+	"github.com/clickyab/services/array"
+	"github.com/clickyab/services/trans"
 )
 
 // IsValid try to validate enum value on ths type

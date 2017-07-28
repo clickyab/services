@@ -16,7 +16,6 @@ type configInitializer struct {
 }
 
 var retryMax = config.RegisterDuration("services.postgres.max_retry_connection", time.Minute, "max time app should fallback to get mysql connection")
-var startupMigration = config.RegisterBoolean("services.postgres.startup_migration", false, "do a migration on startup")
 
 var cfg configInitializer
 

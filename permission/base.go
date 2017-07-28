@@ -4,7 +4,7 @@ import (
 	"sync"
 
 	"github.com/Sirupsen/logrus"
-	"github.com/fzerorubigd/lib/assert"
+	"github.com/clickyab/services/assert"
 )
 
 // UserScope is the permission level for a role
@@ -12,6 +12,7 @@ import (
 // }
 type UserScope string
 
+// Token is the resource to check
 type Token string
 
 const (

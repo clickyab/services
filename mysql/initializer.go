@@ -16,6 +16,7 @@ import (
 	"github.com/clickyab/services/assert"
 	"github.com/clickyab/services/healthz"
 	"github.com/clickyab/services/initializer"
+	"github.com/clickyab/services/migration"
 	"github.com/clickyab/services/safe"
 	gorp "gopkg.in/gorp.v2"
 )
