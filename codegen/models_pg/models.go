@@ -11,8 +11,8 @@ import (
 	"strings"
 	"text/template"
 
-	"github.com/fzerorubigd/lib/codegen/annotate"
-	"github.com/fzerorubigd/lib/codegen/plugins"
+	"github.com/clickyab/services/codegen/annotate"
+	"github.com/clickyab/services/codegen/plugins"
 
 	"github.com/Sirupsen/logrus"
 	"github.com/goraz/humanize"

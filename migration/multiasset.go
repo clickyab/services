@@ -30,11 +30,11 @@ const (
 	Down
 )
 
-type byId []*migrate.Migration
+type byID []*migrate.Migration
 
-func (b byId) Len() int           { return len(b) }
-func (b byId) Swap(i, j int)      { b[i], b[j] = b[j], b[i] }
-func (b byId) Less(i, j int) bool { return b[i].Less(b[j]) }
+func (b byID) Len() int           { return len(b) }
+func (b byID) Swap(i, j int)      { b[i], b[j] = b[j], b[i] }
+func (b byID) Less(i, j int) bool { return b[i].Less(b[j]) }
 
 type multiAsset []migrate.AssetMigrationSource
 
@@ -47,7 +47,7 @@ func (m multiAsset) FindMigrations() ([]*migrate.Migration, error) {
 		}
 		mig = append(mig, m...)
 	}
-	sort.Sort(byId(mig))
+	sort.Sort(byID(mig))
 	return mig, nil
 }
 

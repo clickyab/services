@@ -22,8 +22,7 @@ var (
 	develMode = config.RegisterBoolean("core.devel_mode", true, "development mode")
 	retryMax  = config.RegisterDuration("services.mysql.max_retry_connection", time.Minute, "max time app should fallback to get mysql connection")
 	// CD is cool down, the time needed to sleep after each update
-	rdbUpdateCD      = config.RegisterDuration("services.mysql.max_retry_connection", time.Minute*2, "refresh read connection status after this amount of time")
-	startupMigration = config.RegisterBoolean("services.mysql.startup_migration", false, "do a migration on startup")
+	rdbUpdateCD = config.RegisterDuration("services.mysql.max_retry_connection", time.Minute*2, "refresh read connection status after this amount of time")
 )
 
 func init() {

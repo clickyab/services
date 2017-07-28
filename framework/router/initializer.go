@@ -10,7 +10,6 @@ import (
 	"github.com/Sirupsen/logrus"
 	"github.com/clickyab/services/assert"
 	"github.com/clickyab/services/config"
-	"github.com/clickyab/services/framework"
 	"github.com/clickyab/services/framework/middleware"
 	"github.com/clickyab/services/initializer"
 	"github.com/rs/cors"

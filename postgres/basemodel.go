@@ -12,9 +12,9 @@ import (
 	// Make sure postgres is included in any build
 	"os"
 
-	"github.com/fzerorubigd/lib/migration"
-	"github.com/fzerorubigd/lib/safe"
-	_ "github.com/lib/pq"
+	"github.com/clickyab/services/migration"
+	"github.com/clickyab/services/safe"
+	_ "github.com/lib/pq" // Make sure the pg is available
 	gorp "gopkg.in/gorp.v2"
 )
 
