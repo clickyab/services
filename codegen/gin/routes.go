@@ -72,9 +72,11 @@ import (
 	"cerulean.ir/goapp/modules/user/middleware"
 )
 
+var once = sync.Once{}
 
 // Routes return the route registered with this
 func ({{ .GroupRec }} *{{ .StructName }}) Routes(r *xmux.Mux, mountPoint string) {
+	once.Do(func() {
 	{{ if .Full }}
 	groupMiddleware := []framework.Middleware{
 		{{ range $gm := .GroupMiddleware }}{{ $gm }},
@@ -103,6 +105,7 @@ func ({{ .GroupRec }} *{{ .StructName }}) Routes(r *xmux.Mux, mountPoint string)
 	{{ end }}
 	{{ end }}
 	initializer.DoInitialize({{ .GroupRec }})
+	})
 }
 
 func init() {
