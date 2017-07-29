@@ -72,15 +72,42 @@ func createDBMap(dsn, mark string) *gorp.DbMap {
 }
 
 func ping(db ...*gorp.DbMap) error {
+	if !dbReplicated.Bool() {
+		for i := range db {
+			err := db[i].Db.Ping()
+			if err != nil {
+				logrus.Error(err)
+				continue
+			}
+			return nil // just one active connection is fine
+		}
+		return fmt.Errorf("all %d ping(s) failed", len(db))
+	}
 	for i := range db {
-		err := db[i].Db.Ping()
+		f := slaveStatus{}
+		err := db[i].SelectOne(&f, `SHOW SLAVE STATUS`)
 		if err != nil {
-			logrus.Error(err)
 			continue
 		}
-		return nil // just one active connection is fine
+
+		if f.LastErrno != 0 || f.SlaveIORunning == "No" || f.SlaveSQLRunning == "No" {
+			continue
+		} else if f.SecondsBehindMaster.Valid {
+			if f.SecondsBehindMaster.Int64 > validSecondsSlaveBehind.Int64() {
+				continue
+			}
+		}
+		return nil
 	}
-	return fmt.Errorf("all %d ping(s) failed", len(db))
+	return fmt.Errorf("all %d slave(s) failed", len(db))
+}
+
+// PingDB pings a specific db
+func PingDB(dbIndex int) error {
+	if dbIndex > len(rdbmap)-1 {
+		return errors.New("index out of db bound")
+	}
+	return ping(rdbmap[dbIndex])
 }
 
 // Initialize the modules, its safe to call this as many time as you want.
