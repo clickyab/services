@@ -71,8 +71,8 @@ func createDBMap(dsn, mark string) *gorp.DbMap {
 	return dbmap
 }
 
-func ping(db ...*gorp.DbMap) error {
-	if !dbReplicated.Bool() {
+func ping(replication bool, db ...*gorp.DbMap) error {
+	if !replication {
 		for i := range db {
 			err := db[i].Db.Ping()
 			if err != nil {
@@ -107,7 +107,7 @@ func PingDB(dbIndex int) error {
 	if dbIndex > len(rdbmap)-1 {
 		return errors.New("index out of db bound")
 	}
-	return ping(rdbmap[dbIndex])
+	return ping(dbReplicated.Bool(), rdbmap[dbIndex])
 }
 
 // Initialize the modules, its safe to call this as many time as you want.
@@ -116,7 +116,7 @@ func (in *initMysql) Initialize(ctx context.Context) {
 		assert.NotNil(factory)
 
 		wdbmap = createDBMap(wdsn.String(), "[wdb]")
-		safe.Try(func() error { return ping(wdbmap) }, retryMax.Duration())
+		safe.Try(func() error { return ping(false, wdbmap) }, retryMax.Duration())
 
 		rdsns := strings.Split(rdsnSlice.String(), ",")
 		if len(rdsns) == 0 {
@@ -128,7 +128,7 @@ func (in *initMysql) Initialize(ctx context.Context) {
 			tmpDBMap := createDBMap(rdsns[i], fmt.Sprintf("[rdb%d]", i+1))
 			rdbmap = append(rdbmap, tmpDBMap)
 		}
-		safe.Try(func() error { return ping(rdbmap...) }, retryMax.Duration())
+		safe.Try(func() error { return ping(dbReplicated.Bool(), rdbmap...) }, retryMax.Duration())
 
 		fillSafeArray()
 		safe.GoRoutine(func() { updateRdbMap(ctx) })
@@ -168,7 +168,7 @@ func updateRdbMap(ctx context.Context) {
 func fillSafeArray() {
 	tmp := []*gorp.DbMap{}
 	for i := range rdbmap {
-		if err := ping(rdbmap[i]); err == nil {
+		if err := ping(dbReplicated.Bool(), rdbmap[i]); err == nil {
 			tmp = append(tmp, rdbmap[i])
 		}
 	}
@@ -205,8 +205,8 @@ func doMigration() {
 
 // Healthy return true if the databases are ok and ready for ping
 func (in *initMysql) Healthy(context.Context) error {
-	rErr := ping(rdbmap...)
-	wErr := ping(wdbmap)
+	rErr := ping(dbReplicated.Bool(), rdbmap...)
+	wErr := ping(false, wdbmap)
 
 	if rErr != nil || wErr != nil {
 		return fmt.Errorf("mysql PING failed, read error was %s and write error was %s", rErr, wErr)
