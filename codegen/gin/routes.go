@@ -64,12 +64,10 @@ package {{ .GroupPkg }}
 
 import (
 	"github.com/clickyab/services/framework"
-	"github.com/clickyab/services/framework/middleware"
 	"github.com/clickyab/services/framework/router"
 	"github.com/clickyab/services/initializer"
 	"github.com/rs/xhandler"
 	"github.com/rs/xmux"
-	"cerulean.ir/goapp/modules/user/middleware"
 )
 
 var once = sync.Once{}
