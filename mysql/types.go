@@ -13,12 +13,6 @@ import (
 
 const nullString = "null"
 
-// Initializer is for model when the have need extra initialize on save/update
-type Initializer interface {
-	// Initialize is the method to call att save/update
-	Initialize()
-}
-
 // Int64Slice is simple slice to handle it for json field
 type Int64Slice []int64
 

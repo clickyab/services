@@ -28,7 +28,7 @@ var (
 	wdbmap   *gorp.DbMap
 
 	once    = sync.Once{}
-	all     []Initializer
+	all     []initializer.Simple
 	factory func(string) (*sql.DB, error)
 )
 
@@ -357,7 +357,7 @@ func (m *Manager) TruncateTables(tbl string) error {
 }
 
 // Register a new initMysql module
-func Register(m ...Initializer) {
+func Register(m ...initializer.Simple) {
 	all = append(all, m...)
 }
 
