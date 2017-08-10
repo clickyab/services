@@ -40,8 +40,8 @@ var (
 		"sql.NullTime": {"type": "string", "format": "dateTime"},
 		"github.com/clickyab/services/postgres/models/common.NullTime":   {"type": "string", "format": "dateTime"},
 		"github.com/clickyab/services/postgres/models/common.NullString": {"type": "string"},
-		"modules/balance/acc.Money":                                         {"type": "integer"},
-		"modules/user/aaa.UserStatus":                                       {"type": "string"},
+		"modules/balance/acc.Money":                                      {"type": "integer"},
+		"modules/user/aaa.UserStatus":                                    {"type": "string"},
 	}
 )
 
