@@ -74,7 +74,7 @@ func (reporter) Recover(err error, stack []byte, extra ...interface{}) {
 	at := []attachment{}
 	for i := range extra {
 		if t, ok := extra[i].(*http.Request); ok {
-			if b, err := httputil.DumpRequest(t, true); err != nil {
+			if b, err := httputil.DumpRequest(t, true); err == nil {
 				at = append(at, attachment{
 					Title: "Request dump",
 					Text:  string(b),

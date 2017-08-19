@@ -48,7 +48,7 @@ func (reporter) Recover(err error, ds []byte, extra ...interface{}) {
 	stack := string(ds)
 	for i := range extra {
 		if t, ok := extra[i].(*http.Request); ok {
-			if b, err := httputil.DumpRequest(t, true); err != nil {
+			if b, err := httputil.DumpRequest(t, true); err == nil {
 				stack += "\n\n the https request dump : \n\n%s" + string(b)
 				continue
 			}
