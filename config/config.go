@@ -56,7 +56,10 @@ type layer struct {
 // Load a layer into the Onion. the call is only done in the
 // registration
 func (l *layer) Load() (map[string]interface{}, error) {
-	return l.defaltLayer.Load()
+	if l.defaltLayer != nil {
+		return l.defaltLayer.Load()
+	}
+	return map[string]interface{}{}, nil
 }
 
 // Add set a default value for a key
