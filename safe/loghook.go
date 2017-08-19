@@ -15,7 +15,7 @@ func (logPrinter) Recover(err error, stack []byte, extra ...interface{}) {
 
 	for i := range extra {
 		if t, ok := extra[i].(*http.Request); ok {
-			if b, err := httputil.DumpRequest(t, true); err != nil {
+			if b, err := httputil.DumpRequest(t, true); err == nil {
 				logrus.Errorf("the https request dump : \n\n%s", string(b))
 				continue
 			}
