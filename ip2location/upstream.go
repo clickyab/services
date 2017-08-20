@@ -32,7 +32,7 @@ type Record struct {
 	CountryLong        string  `json:"countryLong"`
 	Region             string  `json:"region"`
 	City               string  `json:"city"`
-	Isp                string  `json:"-"`
+	Isp                string  `json:"isp"`
 	Latitude           float32 `json:"-"`
 	Longitude          float32 `json:"-"`
 	Domain             string  `json:"-"`

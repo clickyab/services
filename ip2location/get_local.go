@@ -6,6 +6,7 @@ type IP2lData struct {
 	CountryLong  string `json:"country_long"`
 	Region       string `json:"region"`
 	City         string `json:"city"`
+	ISP          string `json:"isp"`
 }
 
 // IP2Location is the local use of this function
@@ -16,5 +17,6 @@ func IP2Location(ip string) IP2lData {
 		CountryLong:  rec.CountryLong,
 		Region:       rec.Region,
 		City:         rec.City,
+		ISP:          rec.Isp,
 	}
 }
