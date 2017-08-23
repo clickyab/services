@@ -4,6 +4,7 @@ import (
 	"io"
 	"io/ioutil"
 	"os"
+
 	"path/filepath"
 
 	"github.com/clickyab/services/assert"
@@ -13,7 +14,8 @@ import (
 )
 
 var (
-	fp onion.String
+	fl  onion.String
+	pwd string
 )
 
 type fileMock struct {
@@ -22,7 +24,7 @@ type fileMock struct {
 }
 
 func newFileMock() (*fileMock, error) {
-	f, err := os.Open(fp.String())
+	f, err := os.Open(filepath.Join(pwd, fl.String()))
 	if err != nil {
 		return nil, err
 	}
@@ -51,7 +53,8 @@ func (fm *fileMock) ReadAt(b []byte, off int64) (n int, err error) {
 }
 
 func init() {
-	pwd, err := expand.Pwd()
+	var err error
+	pwd, err = expand.Pwd()
 	assert.Nil(err)
-	fp = config.RegisterString("services.ip2location.datafile", filepath.Join(pwd, "IP-COUNTRY-REGION-CITY.BIN"), "location of data file")
+	fl = config.RegisterString("services.ip2location.datafile", "IP-COUNTRY-REGION-CITY-ISP.BIN", "location of data file")
 }
