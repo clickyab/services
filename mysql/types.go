@@ -37,6 +37,31 @@ type NullString struct {
 	String string
 }
 
+// ActiveStatus yes/no bool type
+type ActiveStatus bool
+
+// Scan convert the json array ino string slice
+func (e *ActiveStatus) Scan(src interface{}) error {
+	var b []byte
+	switch src.(type) {
+	case []byte:
+		b = src.([]byte)
+	case string:
+		b = []byte(src.(string))
+	case nil:
+		b = make([]byte, 0)
+	default:
+		return errors.New("unsupported type")
+	}
+	*e = ActiveStatus(b)
+	return nil
+}
+
+// Value try to get the string slice representation in database
+func (e ActiveStatus) Value() (driver.Value, error) {
+	return bool(e), nil
+}
+
 type slaveStatus struct {
 	SlaveIOState              sql.NullString `db:"slave_io_state"`
 	MasterHost                sql.NullString `db:"master_host"`
