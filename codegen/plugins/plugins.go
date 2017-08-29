@@ -8,8 +8,8 @@ import (
 
 	"sort"
 
-	"github.com/Sirupsen/logrus"
 	"github.com/goraz/humanize"
+	"github.com/sirupsen/logrus"
 )
 
 // AnnotationPlug is the base plugin system

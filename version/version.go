@@ -8,7 +8,7 @@ import (
 	"github.com/clickyab/services/assert"
 	"github.com/clickyab/services/initializer"
 
-	"github.com/Sirupsen/logrus"
+	"github.com/sirupsen/logrus"
 )
 
 // Data is the application version in detail

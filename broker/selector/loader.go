@@ -8,7 +8,7 @@ import (
 
 	"github.com/clickyab/services/broker/rabbitmq"
 
-	"github.com/Sirupsen/logrus"
+	"github.com/sirupsen/logrus"
 )
 
 type cfg struct {

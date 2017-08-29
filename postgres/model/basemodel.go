@@ -7,8 +7,8 @@ import (
 
 	gorp "gopkg.in/gorp.v2"
 
-	"github.com/Sirupsen/logrus"
 	_ "github.com/lib/pq" // Make sure postgres is included in any build
+	"github.com/sirupsen/logrus"
 )
 
 var (

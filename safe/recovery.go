@@ -3,7 +3,7 @@ package safe
 import (
 	"sync"
 
-	"github.com/Sirupsen/logrus"
+	"github.com/sirupsen/logrus"
 )
 
 // RecoverHook is the interface to handle recovery

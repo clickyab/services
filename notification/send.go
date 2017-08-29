@@ -1,9 +1,9 @@
 package notification
 
 import (
-	"github.com/Sirupsen/logrus"
 	"github.com/clickyab/services/assert"
 	"github.com/clickyab/services/notification/internal/mail"
+	"github.com/sirupsen/logrus"
 )
 
 type (

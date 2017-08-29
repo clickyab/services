@@ -3,7 +3,7 @@ package assert
 import (
 	"fmt"
 
-	"github.com/Sirupsen/logrus"
+	"github.com/sirupsen/logrus"
 )
 
 func doPanic(err string, tag string, params ...interface{}) {

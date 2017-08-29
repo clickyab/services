@@ -7,10 +7,10 @@ import (
 	"sync"
 	"time"
 
-	"github.com/Sirupsen/logrus"
 	"github.com/clickyab/services/assert"
 	"github.com/clickyab/services/initializer"
 	"github.com/influxdata/influxdb/client/v2"
+	"github.com/sirupsen/logrus"
 )
 
 type initInflux struct {

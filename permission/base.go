@@ -3,8 +3,8 @@ package permission
 import (
 	"sync"
 
-	"github.com/Sirupsen/logrus"
 	"github.com/clickyab/services/assert"
+	"github.com/sirupsen/logrus"
 )
 
 // UserScope is the permission level for a role
