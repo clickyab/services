@@ -11,8 +11,8 @@ import (
 
 	"fmt"
 
-	"github.com/Sirupsen/logrus"
 	"github.com/clickyab/services/safe"
+	"github.com/sirupsen/logrus"
 	"github.com/streadway/amqp"
 )
 

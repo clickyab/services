@@ -8,7 +8,7 @@ import (
 
 	"github.com/clickyab/services/assert"
 
-	"github.com/Sirupsen/logrus"
+	"github.com/sirupsen/logrus"
 )
 
 var client *http.Client

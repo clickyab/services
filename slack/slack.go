@@ -10,7 +10,7 @@ import (
 	"github.com/clickyab/services/config"
 	"github.com/clickyab/services/safe"
 
-	"github.com/Sirupsen/logrus"
+	"github.com/sirupsen/logrus"
 )
 
 var (

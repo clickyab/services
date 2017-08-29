@@ -9,8 +9,8 @@ import (
 	"github.com/clickyab/services/config"
 	"github.com/clickyab/services/safe"
 
-	"github.com/Sirupsen/logrus"
 	"github.com/fzerorubigd/go-redmine"
+	"github.com/sirupsen/logrus"
 )
 
 var (

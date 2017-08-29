@@ -6,10 +6,10 @@ import (
 
 	"fmt"
 
-	"github.com/Sirupsen/logrus"
 	"github.com/clickyab/services/framework/router"
 	"github.com/rs/xhandler"
 	"github.com/rs/xmux"
+	"github.com/sirupsen/logrus"
 )
 
 type route struct {

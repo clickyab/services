@@ -4,7 +4,7 @@ import (
 	"net/http"
 	"net/http/httputil"
 
-	"github.com/Sirupsen/logrus"
+	"github.com/sirupsen/logrus"
 )
 
 type logPrinter struct {

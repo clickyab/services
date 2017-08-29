@@ -8,7 +8,7 @@ import (
 
 	"github.com/clickyab/services/assert"
 
-	"github.com/Sirupsen/logrus"
+	"github.com/sirupsen/logrus"
 	onion "gopkg.in/fzerorubigd/onion.v3"
 	"gopkg.in/fzerorubigd/onion.v3/extraenv"
 )

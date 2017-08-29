@@ -6,11 +6,11 @@ import (
 	"strings"
 	"sync"
 
-	"github.com/Sirupsen/logrus"
 	"github.com/clickyab/services/assert"
 	"github.com/clickyab/services/healthz"
 	"github.com/clickyab/services/initializer"
 	"github.com/clickyab/services/safe"
+	"github.com/sirupsen/logrus"
 	"gopkg.in/redis.v5"
 )
 

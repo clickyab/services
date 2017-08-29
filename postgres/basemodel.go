@@ -5,10 +5,10 @@ import (
 	"context"
 	"database/sql"
 
-	"github.com/Sirupsen/logrus"
 	"github.com/clickyab/services/assert"
 	"github.com/clickyab/services/initializer"
 	"github.com/clickyab/services/postgres/model"
+	"github.com/sirupsen/logrus"
 	// Make sure postgres is included in any build
 	"os"
 

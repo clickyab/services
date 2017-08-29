@@ -14,8 +14,8 @@ import (
 	"github.com/clickyab/services/codegen/annotate"
 	"github.com/clickyab/services/codegen/plugins"
 
-	"github.com/Sirupsen/logrus"
 	"github.com/goraz/humanize"
+	"github.com/sirupsen/logrus"
 	"golang.org/x/tools/imports"
 )
 

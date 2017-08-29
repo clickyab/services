@@ -9,9 +9,9 @@ import (
 	"github.com/clickyab/services/initializer"
 	"github.com/clickyab/services/random"
 
-	"github.com/Sirupsen/logrus"
 	"github.com/fzerorubigd/expand"
 	"github.com/pkg/profile"
+	"github.com/sirupsen/logrus"
 )
 
 var (

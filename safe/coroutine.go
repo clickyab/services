@@ -9,7 +9,7 @@ import (
 
 	"time"
 
-	"github.com/Sirupsen/logrus"
+	"github.com/sirupsen/logrus"
 )
 
 func mkTitle(err interface{}, title error, commits int64, short string) error {

@@ -4,8 +4,8 @@ import (
 	"net/http"
 	"time"
 
-	"github.com/Sirupsen/logrus"
 	"github.com/clickyab/services/framework"
+	"github.com/sirupsen/logrus"
 )
 
 type wrapper struct {
