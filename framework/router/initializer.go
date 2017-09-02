@@ -39,6 +39,9 @@ type initer struct {
 func (i *initer) Initialize(ctx context.Context) {
 	engine = xmux.New()
 	c := cors.New(cors.Options{
+		AllowCredentials: true,
+		AllowedMethods:   []string{"GET", "POST", "OPTIONS", "PUT", "PATCH"},
+		AllowedHeaders:   []string{"token", "content-type"},
 		AllowOriginFunc: func(origin string) bool {
 			return true // TODO : write the real code here
 		},
