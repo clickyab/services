@@ -9,10 +9,11 @@ var (
 	dialer *gomail.Dialer
 	from   = config.RegisterString("crab.mail_service.from", "info@clickyab.com", "from part of mail")
 
-	smtpUsername = config.GetString("services.smtp.username")
-	smtpPassword = config.GetString("services.smtp.password")
-	smtpHost     = config.GetString("services.smtp.host")
-	smtpPort     = config.GetInt("services.smtp.address_port")
+	smtpUsername = config.GetStringDefault("services.smtp.username", "")
+	smtpPassword = config.GetStringDefault("services.smtp.password", "")
+
+	smtpHost = config.GetStringDefault("services.smtp.host", "0.0.0.0")
+	smtpPort = config.GetIntDefault("services.smtp.address_port", 1025)
 )
 
 func init() {
