@@ -76,12 +76,12 @@ func Send(subject string, msg string, p ...Packet) {
 		case MailType:
 			conf := p[i].mailConfig
 			if conf == nil {
-				logrus.Panic("packet's config must be set")
+				conf = &mailConfig{}
 			}
 			mail.Send(subject, msg, conf.FileAddr, conf.Cc, conf.Bcc, p[i].To...)
 		case SMSType:
 			if p[i].smsConfig == nil {
-				logrus.Panic("packet's config must be set")
+				//some
 			}
 			//do some
 		}

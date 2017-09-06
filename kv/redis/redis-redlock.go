@@ -4,13 +4,12 @@ import (
 	"sync"
 	"time"
 
-	"sync/atomic"
-
+	"clickyab.com/gad/src/utils"
 	"github.com/clickyab/services/aredis"
-	"github.com/clickyab/services/assert"
 	"github.com/clickyab/services/config"
 	"github.com/clickyab/services/kv"
 	"github.com/clickyab/services/random"
+	"github.com/sirupsen/logrus"
 )
 
 const unlockScript = `
@@ -40,13 +39,6 @@ var tryCoolDown = config.RegisterDuration("services.kv.redlock.cooldown", time.M
 
 // Lock is used to set a record in redis and tries until it gets its goal
 func (m *mux) Lock() {
-	// Make sure this is locked here, and concurrent call to this
-	// is blocked by the simple mutex.
-	// this is a distributed lock, and also it means it must block the same
-	// call in the same routine too!
-	m.locker.Lock()
-
-	assert.True(atomic.CompareAndSwapInt32(&m.swap, 0, 1), "invalid value on lock")
 	m.now = time.Now()
 
 	m.value = <-random.ID
@@ -63,31 +55,11 @@ func (m *mux) Lock() {
 
 // Unlock tries to get the record from redis and tries until it can
 func (m *mux) Unlock() {
-	// must be unlocked after the call, this block concurrent call in same process
-	defer m.locker.Unlock()
-
-	assert.True(atomic.LoadInt32(&m.swap) == 1, "not locked?")
-	defer func() {
-		assert.True(atomic.CompareAndSwapInt32(&m.swap, 1, 0), "not locked?")
-	}()
-
 	h := unlockScript
-	for i := 0; i < m.retries; i++ {
-		if time.Since(m.now) > m.TTL() {
-			return
-		}
 
-		cmd := aredis.Client.Eval(h, []string{m.value})
-		if cmd.Err() == nil {
-			if val, ok := cmd.Val().(string); val != m.value || ok == false {
-				time.Sleep(tryCoolDown.Duration())
-				continue
-			}
-		} else {
-			time.Sleep(tryCoolDown.Duration())
-			continue
-		}
-		break
+	cmd := aredis.Client.Eval(h, []string{m.resource}, m.value)
+	if cmd.Err() != nil {
+		logrus.Warn("unlock failed with error :", cmd.Err())
 	}
 }
 
