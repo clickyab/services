@@ -36,6 +36,7 @@ type initMysql struct {
 }
 
 type gorpLogger struct {
+	fields logrus.Fields
 }
 
 type migrationManager struct {
@@ -50,7 +51,7 @@ func (migrationManager) GetDialect() string {
 }
 
 func (g gorpLogger) Printf(format string, v ...interface{}) {
-	logrus.Debugf(format, v...)
+	logrus.WithFields(g.fields).Debugf(format, v...)
 }
 
 func createDBMap(dsn, mark string) *gorp.DbMap {
@@ -62,8 +63,13 @@ func createDBMap(dsn, mark string) *gorp.DbMap {
 
 	dbmap := &gorp.DbMap{Db: db, Dialect: gorp.MySQLDialect{}}
 	if develMode.Bool() {
-		logger := gorpLogger{}
-		dbmap.TraceOn(mark, logger)
+		logger := gorpLogger{
+			fields: logrus.Fields{
+				"marker": mark,
+				"type":   "sql",
+			},
+		}
+		dbmap.TraceOn("", logger)
 	} else {
 		dbmap.TraceOff()
 	}
@@ -76,7 +82,7 @@ func ping(replication bool, db ...*gorp.DbMap) error {
 		for i := range db {
 			err := db[i].Db.Ping()
 			if err != nil {
-				logrus.Error(err)
+				logrus.WithField("database", i).Error(err)
 				continue
 			}
 			return nil // just one active connection is fine
@@ -120,7 +126,7 @@ func (in *initMysql) Initialize(ctx context.Context) {
 
 		rdsns := strings.Split(rdsnSlice.String(), ",")
 		if len(rdsns) == 0 {
-			logrus.Warn("No read db is configured. using write as read")
+			logrus.WithField("type", "sql").Warn("No read db is configured. using write as read")
 			rdsns = append(rdsns, wdsn.String()) // Add write as read source if there is no read source
 		}
 
