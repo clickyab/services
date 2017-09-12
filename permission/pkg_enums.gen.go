@@ -14,7 +14,6 @@ func (e UserScope) IsValid() bool {
 	return array.StringInArray(
 		string(e),
 		string(ScopeSelf),
-		string(ScopeParent),
 		string(ScopeGlobal),
 	)
 }

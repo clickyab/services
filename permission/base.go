@@ -18,8 +18,6 @@ type Token string
 const (
 	// ScopeSelf means the user him self, no additional parameter
 	ScopeSelf UserScope = "self"
-	// ScopeParent means the user child, need id of all child as parameter
-	ScopeParent UserScope = "parent"
 	// ScopeGlobal means the entire perm, no param is required
 	ScopeGlobal UserScope = "global"
 )
@@ -27,9 +25,9 @@ const (
 // Interface is the perm interface
 type Interface interface {
 	// HasPermString is the has perm check
-	Has(scope UserScope, perm Token) (UserScope, bool)
+	Has(scope UserScope, perm Token, d int64) (UserScope, bool)
 	// HasPermStringOn is the has perm on check
-	HasOn(perm Token, ownerID, parentID int64, scopes ...UserScope) (UserScope, bool)
+	HasOn(perm Token, ownerID, parentID int64, d int64, scopes ...UserScope) (UserScope, bool)
 }
 
 // InterfaceComplete is the complete version of the interface to use
@@ -62,13 +60,13 @@ const (
 )
 
 // HasPermString is the has perm check
-func (pc complete) Has(scope UserScope, perm Token) (UserScope, bool) {
-	return pc.inner.Has(scope, perm)
+func (pc complete) Has(scope UserScope, perm Token, d int64) (UserScope, bool) {
+	return pc.inner.Has(scope, perm, d)
 }
 
 // HasPermStringOn is the has perm on check
-func (pc complete) HasOn(perm Token, ownerID, parentID int64, scopes ...UserScope) (UserScope, bool) {
-	return pc.inner.HasOn(perm, ownerID, parentID, scopes...)
+func (pc complete) HasOn(perm Token, ownerID, parentID int64, d int64, scopes ...UserScope) (UserScope, bool) {
+	return pc.inner.HasOn(perm, ownerID, parentID, d, scopes...)
 }
 
 // GetID return the id of holder
@@ -116,10 +114,10 @@ func GetAll() map[Token]string {
 }
 
 // NewInterfaceComplete return a new object base on the minimum object
-func NewInterfaceComplete(inner Interface, id int64, perm Token, scope UserScope) InterfaceComplete {
-	s, ok := inner.Has(scope, perm)
+func NewInterfaceComplete(inner Interface, id int64, perm Token, scope UserScope, domainID int64) InterfaceComplete {
+	s, ok := inner.Has(scope, perm, domainID)
 	if !ok {
-		s, ok = inner.Has(ScopeGlobal, God)
+		s, ok = inner.Has(ScopeGlobal, God, domainID)
 	}
 	assert.True(ok, "[BUG] probably there is some thing wrong with code generation")
 	pc := &complete{
@@ -131,6 +129,22 @@ func NewInterfaceComplete(inner Interface, id int64, perm Token, scope UserScope
 
 	return pc
 }
+
+// Column is a single column in data tables
+type Column struct {
+	Data           string            `json:"data"`
+	Type           string            `json:"type"`
+	Name           string            `json:"name"`
+	Searchable     bool              `json:"searchable"`
+	Sortable       bool              `json:"sortable"`
+	Visible        bool              `json:"visible"`
+	Filter         bool              `json:"filter"`
+	Title          string            `json:"title"`
+	FilterValidMap map[string]string `json:"filter_valid_map"`
+}
+
+// Columns is the columns in data tables
+type Columns []Column
 
 func init() {
 	Register(God, "the god, can do anything")
