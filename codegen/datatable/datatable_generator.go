@@ -186,7 +186,6 @@ var (
 //		_sort_ = string, the sort and order like id:asc or id:desc available column {{ .ValidSorts }}{{end}}{{ range $f := .Data.Column }}{{ if $f.Filter }}
 //		_{{ $f.Data }}_ = string , filter the {{ $f.Data }} field valid values are {{ $f.FilterValid }}{{ end }}{{ end }}{{ range $f := .Data.Column }}{{ if $f.Searchable }}
 //		_{{ $f.Data }}_ = string , search the {{ $f.Data }} field {{ end }}{{ end }}
-//		_def_ = bool, show definition in result?
 //		200 = list{{ .Data.Entity|ucfirst }}Response
 // }
 func (u *Controller) list{{ .Data.Entity|ucfirst }}(ctx context.Context, w http.ResponseWriter, r *http.Request) {
@@ -257,6 +256,7 @@ func (u *Controller) list{{ .Data.Entity|ucfirst }}(ctx context.Context, w http.
 // @Route {
 // 		url = {{ .Data.URL }}/definition
 //		method = get
+//		resource = {{ .Data.View.Total }}
 //		200 = list{{ .Data.Entity|ucfirst }}DefResponse
 // }
 func (u *Controller) def{{ .Data.Entity|ucfirst }}(ctx context.Context, w http.ResponseWriter, r *http.Request) {
