@@ -71,7 +71,12 @@ func (reporter) Recover(err error, stack []byte, extra ...interface{}) {
 		}
 	}
 
-	at := []attachment{}
+	at := []attachment{
+		{
+			Title: "Stack trace",
+			Text:  string(stack),
+		},
+	}
 	for i := range extra {
 		if t, ok := extra[i].(*http.Request); ok {
 			if b, err := httputil.DumpRequest(t, true); err == nil {
