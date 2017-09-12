@@ -4,6 +4,8 @@ import (
 	"net/http"
 	"time"
 
+	"fmt"
+
 	"github.com/clickyab/services/framework"
 	"github.com/sirupsen/logrus"
 )
@@ -43,7 +45,7 @@ func Logger(next http.HandlerFunc) http.HandlerFunc {
 			logrus.Fields{
 				"Method":   r.Method,
 				"Path":     r.URL.Path,
-				"Latency":  latency,
+				"Latency":  fmt.Sprint(latency),
 				"ClientIP": framework.RealIP(r),
 				"Status":   wr.status,
 				"Len":      wr.total,
