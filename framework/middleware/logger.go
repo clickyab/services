@@ -43,6 +43,7 @@ func Logger(next http.HandlerFunc) http.HandlerFunc {
 		latency := time.Since(start)
 		logrus.WithFields(
 			logrus.Fields{
+				"Domain":   r.Host,
 				"Method":   r.Method,
 				"Path":     r.URL.Path,
 				"Latency":  fmt.Sprint(latency),
