@@ -66,14 +66,12 @@ import (
 	"github.com/clickyab/services/framework"
 	"github.com/clickyab/services/framework/router"
 	"github.com/clickyab/services/initializer"
-	"github.com/rs/xhandler"
-	"github.com/rs/xmux"
 )
 
 var once = sync.Once{}
 
 // Routes return the route registered with this
-func ({{ .GroupRec }} *{{ .StructName }}) Routes(r *xmux.Mux, mountPoint string) {
+func ({{ .GroupRec }} *{{ .StructName }}) Routes(r router.Mux) {
 	once.Do(func() {
 	{{ if .Full }}
 	groupMiddleware := []framework.Middleware{
@@ -83,7 +81,7 @@ func ({{ .GroupRec }} *{{ .StructName }}) Routes(r *xmux.Mux, mountPoint string)
 	{{ if .GroupFuncMiddleware }}
 	groupMiddleware = append(groupMiddleware, {{ $.GroupRec }}.{{ $.GroupFuncMiddleware|strip_type }}()...)
 	{{ end }}
-	group := r.NewGroup(mountPoint +  "{{ .Group }}")
+	group := r.NewGroup("{{ .Group }}")
 
 	{{ range $key ,$route := .Routes }}
 	/* Route {{ $route | jsonize }} with key {{ $key }} */
@@ -98,7 +96,7 @@ func ({{ .GroupRec }} *{{ .StructName }}) Routes(r *xmux.Mux, mountPoint string)
 	m{{ $key }} = append(m{{ $key }}, {{ $.GroupRec }}.{{ $route.RouteFuncMiddleware|strip_type }}()...){{ end }}
 	{{ if $route.Payload }} // Make sure payload is the last middleware
 	m{{ $key }} = append(m{{ $key }}, middleware.PayloadUnMarshallerGenerator({{$route.Payload}}{})){{ end }}
-	group.{{ $route.Method }}("{{ $route.Route }}",xhandler.HandlerFuncC(framework.Mix({{ $.GroupRec }}.{{ $route.Function|strip_type }}, m{{ $key }}...)))
+	group.{{ $route.Method }}("{{ $route.Route }}",framework.Mix({{ $.GroupRec }}.{{ $route.Function|strip_type }}, m{{ $key }}...))
 	// End route with key {{ $key }}
 	{{ end }}
 	{{ end }}
