@@ -53,8 +53,10 @@ func Initialize(organization, appName, prefix string, layers ...onion.Layer) {
 
 		logrus.Infof("loading config from %s", "/etc/"+organization+"/"+appName+".yaml")
 	}
-	if err = o.AddLayer(onion.NewFileLayer(usr.HomeDir + "/." + organization + "/" + appName + ".yaml")); err == nil {
-		logrus.Infof("loading config from %s", usr.HomeDir+"/."+organization+"/"+appName+".yaml")
+	if usr != nil {
+		if err = o.AddLayer(onion.NewFileLayer(usr.HomeDir + "/." + organization + "/" + appName + ".yaml")); err == nil {
+			logrus.Infof("loading config from %s", usr.HomeDir+"/."+organization+"/"+appName+".yaml")
+		}
 	}
 	if err = o.AddLayer(onion.NewFileLayer(dir + "/configs/" + appName + ".yaml")); err == nil {
 		logrus.Infof("loading config from %s", dir+"/configs/"+appName+".yaml")
