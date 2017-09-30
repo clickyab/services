@@ -32,6 +32,8 @@ var (
 // GlobalMiddleware is the middleware that must be on all routes
 type GlobalMiddleware interface {
 	Handler(framework.Handler) framework.Handler
+
+	PreRoute() bool
 }
 
 // Mux is the simple router interface
@@ -69,22 +71,51 @@ type Routes interface {
 	Routes(Mux)
 }
 
+type fake struct {
+	base framework.Handler
+}
+
+func (f fake) ServeHTTPC(ctx context.Context, w http.ResponseWriter, r *http.Request) {
+	f.base(ctx, w, r)
+}
+
 type initer struct {
 }
 
 func (i *initer) Initialize(ctx context.Context) {
 	engine = xmux.New()
 
-	f := func(next framework.Handler) framework.Handler {
-		for i := range mid {
-			next = mid[i].Handler(next)
+	var (
+		pre  []GlobalMiddleware
+		post []GlobalMiddleware
+	)
+
+	for i := range mid {
+		if mid[i].PreRoute() {
+			pre = append(pre, mid[i])
+		} else {
+			post = append(post, mid[i])
+		}
+	}
+
+	fPre := func(next framework.Handler) framework.Handler {
+		for i := range pre {
+			next = pre[i].Handler(next)
+		}
+
+		return next
+	}
+
+	fPost := func(next framework.Handler) framework.Handler {
+		for i := range post {
+			next = post[i].Handler(next)
 		}
 
 		return next
 	}
 
 	xm := &xmuxer{
-		middleware: f,
+		middleware: fPost,
 	}
 	mp := mountPoint.String()
 	if mp != "" {
@@ -99,7 +130,7 @@ func (i *initer) Initialize(ctx context.Context) {
 	// Append some generic middleware, to handle recovery and log
 	handler := middleware.Recovery(
 		middleware.Logger(
-			xhandler.New(context.Background(), engine).ServeHTTP,
+			xhandler.New(context.Background(), fake{base: fPre(engine.ServeHTTPC)}).ServeHTTP,
 		),
 	)
 	server := &http.Server{Addr: listen.String(), Handler: handler}
