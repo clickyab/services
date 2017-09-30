@@ -27,7 +27,7 @@ type Interface interface {
 	// HasPermString is the has perm check
 	Has(scope UserScope, perm Token, d int64) (UserScope, bool)
 	// HasPermStringOn is the has perm on check
-	HasOn(perm Token, ownerID, parentID int64, d int64, scopes ...UserScope) (UserScope, bool)
+	HasOn(perm Token, ownerID int64, parentIDs []int64, d int64, scopes ...UserScope) (UserScope, bool)
 }
 
 // InterfaceComplete is the complete version of the interface to use
@@ -65,8 +65,8 @@ func (pc complete) Has(scope UserScope, perm Token, d int64) (UserScope, bool) {
 }
 
 // HasPermStringOn is the has perm on check
-func (pc complete) HasOn(perm Token, ownerID, parentID int64, d int64, scopes ...UserScope) (UserScope, bool) {
-	return pc.inner.HasOn(perm, ownerID, parentID, d, scopes...)
+func (pc complete) HasOn(perm Token, ownerID int64, parentIDs []int64, d int64, scopes ...UserScope) (UserScope, bool) {
+	return pc.inner.HasOn(perm, ownerID, parentIDs, d, scopes...)
 }
 
 // GetID return the id of holder
