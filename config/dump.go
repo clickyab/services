@@ -12,7 +12,7 @@ func DumpConfig(w io.Writer) {
 	defer lock.Unlock()
 
 	tab := tabwriter.NewWriter(w, 0, 8, 0, '\t', 0)
-	fmt.Fprint(w, "Key\tDescription\tField\tValue")
+	fmt.Fprint(w, "Key\tDescription\tField\tValue\n")
 	for key := range configs {
 		d, ok := o.Get(key)
 		fmt.Fprintf(tab, "%s\t%s\t%v\t%v\n", key, configs[key], ok, d)
