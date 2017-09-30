@@ -83,29 +83,34 @@ package {{ .PackageName }}
 {{ range $m := .Data }}
 {{ if $m.Primaries }}
 // Create{{ $m.StructName }} try to save a new {{ $m.StructName }} in database
-func (m *Manager) Create{{ $m.StructName }}({{ $m.StructName|getvar }} *{{ $m.StructName }}) error {
+func (m *Manager) Create{{ $m.StructName }}({{ $m.StructName|getvar }} ...*{{ $m.StructName }}) error {
+	dum := make([]interface{}, len({{ $m.StructName|getvar }}))
 	{{ if $m.CreatedAt }}now := time.Now(){{ else if $m.UpdatedAt }}now := time.Now(){{ end }}
-	{{ if $m.CreatedAt }}{{ $m.StructName|getvar }}.CreatedAt = now{{ end }}
-	{{ if $m.UpdatedAt }}{{ $m.StructName|getvar }}.UpdatedAt = now{{ end }}
-	func(in interface{}) {
-		if ii, ok := in.(initializer.Simple); ok {
+	for i := range {{ $m.StructName|getvar }} {
+		{{ if $m.CreatedAt }}{{ $m.StructName|getvar }}[i].CreatedAt = now{{ end }}
+		{{ if $m.UpdatedAt }}{{ $m.StructName|getvar }}[i].UpdatedAt = now{{ end }}
+		dum[i] =  {{ $m.StructName|getvar }}[i]
+		if ii, ok := dum[i].(initializer.Simple); ok {
 			ii.Initialize()
 		}
-	}({{ $m.StructName|getvar }})
+    }
 
-	return m.GetDbMap().Insert({{ $m.StructName|getvar }})
+	return m.GetDbMap().Insert(dum...)
 }
 
 // Update{{ $m.StructName }} try to update {{ $m.StructName }} in database
-func (m *Manager) Update{{ $m.StructName }}({{ $m.StructName|getvar }} *{{ $m.StructName }}) error {
-	{{ if $m.UpdatedAt }}{{ $m.StructName|getvar }}.UpdatedAt = time.Now(){{ end }}
-	func(in interface{}) {
-		if ii, ok := in.(initializer.Simple); ok {
+func (m *Manager) Update{{ $m.StructName }}({{ $m.StructName|getvar }} ...*{{ $m.StructName }}) error {
+	{{ if $m.UpdatedAt }}now := time.Now(){{ end }}
+	dum := make([]interface{}, len({{ $m.StructName|getvar }}))
+	for i := range {{ $m.StructName|getvar }} {
+		{{ if $m.UpdatedAt }}{{ $m.StructName|getvar }}[i].UpdatedAt = now{{ end }}
+		dum[i] =  {{ $m.StructName|getvar }}[i]
+		if ii, ok := dum[i].(initializer.Simple); ok {
 			ii.Initialize()
 		}
-	}({{ $m.StructName|getvar }})
+    }
 
-	_, err := m.GetDbMap().Update({{ $m.StructName|getvar }})
+	_, err := m.GetDbMap().Update(dum...)
 	return err
 }
 {{ end }}

@@ -15,7 +15,7 @@ func DumpConfig(w io.Writer) {
 	fmt.Fprint(w, "Key\tDescription\tField\tValue")
 	for key := range configs {
 		d, ok := o.Get(key)
-		fmt.Fprintf(tab, "%s\t%s\t%b\t%v\n", key, configs[key], ok, d)
+		fmt.Fprintf(tab, "%s\t%s\t%v\t%v\n", key, configs[key], ok, d)
 	}
 	tab.Flush()
 }
