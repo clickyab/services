@@ -7,6 +7,7 @@ import (
 	"fmt"
 
 	"github.com/clickyab/services/framework/router"
+	"github.com/rs/xhandler"
 	"github.com/sirupsen/logrus"
 )
 
@@ -39,7 +40,7 @@ func (r route) check(ctx context.Context, w http.ResponseWriter, rq *http.Reques
 }
 
 func (r route) Routes(mux router.Mux) {
-	mux.GET("/healthz", r.check)
+	mux.RootMux().GET("/healthz", xhandler.HandlerFuncC(r.check))
 }
 
 func init() {

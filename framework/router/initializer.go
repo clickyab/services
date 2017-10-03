@@ -63,6 +63,10 @@ type Mux interface {
 	// NewGroup creates a new routes group with the provided path prefix.
 	// All routes added to the returned group will have the path prepended.
 	NewGroup(string) Mux
+
+	// RootMux return the root mux without any prefix for routes like health
+	// currently just for health check route and things like that
+	RootMux() *xmux.Mux
 }
 
 // Routes the base rote structure
@@ -115,6 +119,7 @@ func (i *initer) Initialize(ctx context.Context) {
 	}
 
 	xm := &xmuxer{
+		root:       engine,
 		middleware: fPost,
 	}
 	mp := mountPoint.String()
