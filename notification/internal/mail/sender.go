@@ -1,7 +1,6 @@
 package mail
 
 import (
-	"github.com/clickyab/services/assert"
 	"github.com/go-gomail/gomail"
 )
 
@@ -23,6 +22,6 @@ func Send(subject, msg, fileAddr string, cc, bcc []string, to ...string) {
 
 	for i := range to {
 		m.SetHeader("To", to[i])
-		assert.Nil(dialer.DialAndSend(m))
+		dialer.DialAndSend(m)
 	}
 }
