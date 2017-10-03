@@ -7,6 +7,7 @@ import (
 )
 
 type xmuxer struct {
+	root       *xmux.Mux
 	engine     *xmux.Mux
 	group      *xmux.Group
 	middleware func(next framework.Handler) framework.Handler
@@ -18,6 +19,7 @@ func (x *xmuxer) getFunc(handler framework.Handler) xhandler.HandlerFuncC {
 
 func (x *xmuxer) NewGroup(path string) Mux {
 	xm := &xmuxer{
+		root:       x.root,
 		engine:     nil,
 		middleware: x.middleware,
 	}
@@ -28,6 +30,10 @@ func (x *xmuxer) NewGroup(path string) Mux {
 	}
 
 	return xm
+}
+
+func (x *xmuxer) RootMux() *xmux.Mux {
+	return x.root
 }
 
 func (x *xmuxer) GET(path string, handler framework.Handler) {
