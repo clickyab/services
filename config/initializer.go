@@ -1,13 +1,11 @@
 package config
 
 import (
-	"os"
-	"os/user"
-	"path/filepath"
 	"runtime"
 
 	"github.com/clickyab/services/assert"
 
+	"github.com/fzerorubigd/expand"
 	"github.com/sirupsen/logrus"
 	onion "gopkg.in/fzerorubigd/onion.v3"
 	"gopkg.in/fzerorubigd/onion.v3/extraenv"
@@ -27,15 +25,6 @@ type Initializer interface {
 
 //Initialize try to initialize config
 func Initialize(organization, appName, prefix string, layers ...onion.Layer) {
-	usr, err := user.Current()
-	if err != nil {
-		logrus.Warn(err)
-	}
-	dir, err := filepath.Abs(filepath.Dir(os.Args[0]))
-	if err != nil {
-		logrus.Warn(err)
-	}
-
 	assert.Nil(o.AddLayer(defaultLayer()))
 
 	for i := range all {
@@ -47,20 +36,24 @@ func Initialize(organization, appName, prefix string, layers ...onion.Layer) {
 	for i := range layers {
 		_ = o.AddLayer(layers[i])
 	}
-
 	// Now load external config to overwrite them all.
-	if err = o.AddLayer(onion.NewFileLayer("/etc/" + organization + "/" + appName + ".yaml")); err == nil {
-
+	if err := o.AddLayer(onion.NewFileLayer("/etc/" + organization + "/" + appName + ".yaml")); err == nil {
 		logrus.Infof("loading config from %s", "/etc/"+organization+"/"+appName+".yaml")
 	}
-	if usr != nil {
-		if err = o.AddLayer(onion.NewFileLayer(usr.HomeDir + "/." + organization + "/" + appName + ".yaml")); err == nil {
-			logrus.Infof("loading config from %s", usr.HomeDir+"/."+organization+"/"+appName+".yaml")
+	p, err := expand.Path("$HOME/." + organization + "/" + appName + ".yaml")
+	if err == nil {
+		if err = o.AddLayer(onion.NewFileLayer(p)); err == nil {
+			logrus.Infof("loading config from %s", p)
 		}
 	}
-	if err = o.AddLayer(onion.NewFileLayer(dir + "/configs/" + appName + ".yaml")); err == nil {
-		logrus.Infof("loading config from %s", dir+"/configs/"+appName+".yaml")
+
+	p, err = expand.Path("$PWD/configs/" + appName + ".yaml")
+	if err == nil {
+		if err = o.AddLayer(onion.NewFileLayer(p)); err == nil {
+			logrus.Infof("loading config from %s", p)
+		}
 	}
+
 	o.AddLazyLayer(extraenv.NewExtraEnvLayer(prefix))
 
 	// load all registered variables
