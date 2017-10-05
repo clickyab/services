@@ -1,28 +1,68 @@
 package mail
 
 import (
-	"github.com/clickyab/services/assert"
-	"github.com/go-gomail/gomail"
+	"fmt"
+
+	"github.com/clickyab/services/config"
+	"github.com/clickyab/services/safe"
+	"gopkg.in/gomail.v2"
 )
 
+var (
+	dialer *gomail.Dialer
+
+	smtpUsername = config.RegisterString("services.smtp.username", "", "smtp user name")
+	smtpPassword = config.RegisterString("services.smtp.password", "", "smtp password")
+
+	smtpHost = config.RegisterString("services.smtp.host", "0127.0.0.1", "smtp host")
+	smtpPort = config.RegisterInt("services.smtp.address_port", 1025, "smtp port")
+)
+
+type EmailAddress struct {
+	Email, Name string
+}
+
+type Message interface {
+	fmt.Stringer
+	Html() string
+}
+
+// NewEmailAddress return a new struct contain email adress and name, just a shortcut
+func NewEmailAddress(mail string) EmailAddress {
+	return EmailAddress{
+		Email: mail,
+		Name:  "",
+	}
+}
+
+// NewEmailNameAddress return a new struct contain email adress and name, just a shortcut
+func NewEmailNameAddress(mail, name string) EmailAddress {
+	return EmailAddress{
+		Email: mail,
+		Name:  name,
+	}
+}
+
 // Send sends Email to client
-func Send(subject, msg, fileAddr string, cc, bcc []string, to ...string) {
+func Send(subject, msg string, from EmailAddress, to ...EmailAddress) {
 	m := gomail.NewMessage()
-	m.SetHeader("From", from.String())
+	m.SetAddressHeader("From", from.Email, from.Name)
 	m.SetHeader("Subject", subject)
 	m.SetBody("text/html", msg)
-	if len(cc) != 0 {
-		m.SetHeader("Cc", cc...)
-	}
-	if len(bcc) != 0 {
-		m.SetHeader("Bcc", bcc...)
-	}
-	if fileAddr != "" {
-		m.Attach(fileAddr)
-	}
 
+	toString := make([]string, len(to))
 	for i := range to {
-		m.SetHeader("To", to[i])
-		assert.Nil(dialer.DialAndSend(m))
+		toString[i] = m.FormatAddress(to[i].Email, to[i].Name)
 	}
+	m.SetHeader("To", toString...)
+
+	// No need to wait for result. its better to have the user and just record the
+	// exception here :)
+	safe.GoRoutine(func() {
+		dialer.DialAndSend(m)
+	})
+}
+
+func init() {
+	dialer = gomail.NewDialer(smtpHost.String(), smtpPort.Int(), smtpUsername.String(), smtpPassword.String())
 }
