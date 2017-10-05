@@ -3,8 +3,11 @@ package mail
 import (
 	"fmt"
 
+	"context"
+
 	"github.com/clickyab/services/assert"
 	"github.com/clickyab/services/config"
+	"github.com/clickyab/services/initializer"
 	"github.com/clickyab/services/safe"
 	"gopkg.in/gomail.v2"
 )
@@ -64,6 +67,13 @@ func Send(subject, msg string, from EmailAddress, to ...EmailAddress) {
 	})
 }
 
-func init() {
+type setup struct {
+}
+
+func (setup) Initialize(context.Context) {
 	dialer = gomail.NewDialer(smtpHost.String(), smtpPort.Int(), smtpUsername.String(), smtpPassword.String())
+}
+
+func init() {
+	initializer.Register(setup{}, 0)
 }
