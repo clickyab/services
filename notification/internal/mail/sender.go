@@ -3,6 +3,7 @@ package mail
 import (
 	"fmt"
 
+	"github.com/clickyab/services/assert"
 	"github.com/clickyab/services/config"
 	"github.com/clickyab/services/safe"
 	"gopkg.in/gomail.v2"
@@ -15,7 +16,7 @@ var (
 	smtpPassword = config.RegisterString("services.smtp.password", "", "smtp password")
 
 	smtpHost = config.RegisterString("services.smtp.host", "0127.0.0.1", "smtp host")
-	smtpPort = config.RegisterInt("services.smtp.address_port", 1025, "smtp port")
+	smtpPort = config.RegisterInt("services.smtp.port", 1025, "smtp port")
 )
 
 type EmailAddress struct {
@@ -59,7 +60,7 @@ func Send(subject, msg string, from EmailAddress, to ...EmailAddress) {
 	// No need to wait for result. its better to have the user and just record the
 	// exception here :)
 	safe.GoRoutine(func() {
-		dialer.DialAndSend(m)
+		assert.Nil(dialer.DialAndSend(m))
 	})
 }
 
