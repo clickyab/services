@@ -1,8 +1,6 @@
 package mail
 
 import (
-	"fmt"
-
 	"context"
 
 	"github.com/clickyab/services/assert"
@@ -22,16 +20,12 @@ var (
 	smtpPort = config.RegisterInt("services.smtp.port", 1025, "smtp port")
 )
 
+// EmailAddress is the simple mail <mail@mail.com>
 type EmailAddress struct {
 	Email, Name string
 }
 
-type Message interface {
-	fmt.Stringer
-	Html() string
-}
-
-// NewEmailAddress return a new struct contain email adress and name, just a shortcut
+// NewEmailAddress return a new struct contain email address and name, just a shortcut
 func NewEmailAddress(mail string) EmailAddress {
 	return EmailAddress{
 		Email: mail,
@@ -39,7 +33,7 @@ func NewEmailAddress(mail string) EmailAddress {
 	}
 }
 
-// NewEmailNameAddress return a new struct contain email adress and name, just a shortcut
+// NewEmailNameAddress return a new struct contain email address and name, just a shortcut
 func NewEmailNameAddress(mail, name string) EmailAddress {
 	return EmailAddress{
 		Email: mail,
