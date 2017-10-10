@@ -773,7 +773,7 @@ func (r *modelsPlugin) Finalize(c interface{}, _ humanize.Package) error {
 	//s, _ := json.MarshalIndent(ctx.data, "", "\t")
 	//fmt.Print(string(s))
 
-	var all []dataModel
+	var all dataModels
 	last := ""
 	for i := range ctx.data {
 		sort.Sort(ctx.data[i])
@@ -810,9 +810,10 @@ func (r *modelsPlugin) Finalize(c interface{}, _ humanize.Package) error {
 
 	last = filepath.Join(filepath.Dir(last), ctx.packageName+".gen.go")
 	buf := &bytes.Buffer{}
+	sort.Sort(all)
 	err := tpl2.Execute(buf, struct {
 		PackageName string
-		Data        []dataModel
+		Data        dataModels
 	}{
 		PackageName: ctx.packageName,
 		Data:        all,
