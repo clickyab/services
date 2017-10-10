@@ -12,6 +12,10 @@ import (
 
 	"path/filepath"
 
+	"strings"
+
+	"sort"
+
 	"github.com/goraz/humanize"
 	"golang.org/x/tools/imports"
 )
@@ -37,6 +41,18 @@ type fieldMap struct {
 }
 
 type context []validate
+
+func (c context) Len() int {
+	return len(c)
+}
+
+func (c context) Less(i, j int) bool {
+	return strings.Compare(c[i].Type, c[j].Type) < 0
+}
+
+func (c context) Swap(i, j int) {
+	c[i], c[j] = c[j], c[i]
+}
 
 var (
 	validateFunc = `
@@ -108,6 +124,7 @@ func (e validatePlugin) Finalize(c interface{}, p humanize.Package) error {
 	}
 
 	buf := &bytes.Buffer{}
+	sort.Sort(ctx)
 	err := tpl.Execute(buf, struct {
 		Data        context
 		PackageName string
