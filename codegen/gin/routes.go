@@ -71,7 +71,7 @@ import (
 var once = sync.Once{}
 
 // Routes return the route registered with this
-func ({{ .GroupRec }} *{{ .StructName }}) Routes(r router.Mux) {
+func ({{ .GroupRec }} *{{ .StructName }}) Routes(r framework.Mux) {
 	once.Do(func() {
 	{{ if .Full }}
 	groupMiddleware := []framework.Middleware{
