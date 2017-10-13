@@ -17,7 +17,7 @@ func (x *xmuxer) getFunc(handler framework.Handler) xhandler.HandlerFuncC {
 	return xhandler.HandlerFuncC(x.middleware(handler))
 }
 
-func (x *xmuxer) NewGroup(path string) Mux {
+func (x *xmuxer) NewGroup(path string) framework.Mux {
 	xm := &xmuxer{
 		root:       x.root,
 		engine:     nil,

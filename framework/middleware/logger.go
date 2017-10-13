@@ -6,9 +6,56 @@ import (
 
 	"fmt"
 
+	"context"
+
 	"github.com/clickyab/services/framework"
+	"github.com/clickyab/services/random"
+	"github.com/clickyab/services/xlog"
 	"github.com/sirupsen/logrus"
 )
+
+type logger struct {
+}
+
+func (logger) Handler(next framework.Handler) framework.Handler {
+	return func(ctx context.Context, w http.ResponseWriter, r *http.Request) {
+
+		// Start timer
+		start := time.Now()
+		// Process request
+		wr := &wrapper{original: w}
+		ray := <-random.ID
+		ctx = xlog.SetFields(
+			ctx,
+			logrus.Fields{
+				"cy-ray": ray,
+			},
+		)
+
+		defer func() {
+			latency := time.Since(start)
+			xlog.GetWithFields(
+				ctx,
+				logrus.Fields{
+					"domain":    r.Host,
+					"method":    r.Method,
+					"path":      r.URL.Path,
+					"latency":   fmt.Sprint(latency),
+					"status":    wr.status,
+					"len":       wr.total,
+					"client_ip": framework.RealIP(r),
+				},
+			).Debug(http.StatusText(wr.status))
+		}()
+
+		wr.Header().Add("cy-ray", ray)
+		next(ctx, wr, r)
+	}
+}
+
+func (logger) PreRoute() bool {
+	return true
+}
 
 type wrapper struct {
 	original http.ResponseWriter
@@ -32,27 +79,6 @@ func (w *wrapper) WriteHeader(c int) {
 }
 
 // Logger is the middleware for log system
-func Logger(next http.HandlerFunc) http.HandlerFunc {
-	return func(w http.ResponseWriter, r *http.Request) {
-
-		// Start timer
-		start := time.Now()
-		// Process request
-		wr := &wrapper{original: w}
-		next(wr, r)
-
-		latency := time.Since(start)
-		logrus.WithFields(
-			logrus.Fields{
-				"Domain":   r.Host,
-				"Method":   r.Method,
-				"Path":     r.URL.Path,
-				"Latency":  fmt.Sprint(latency),
-				"ClientIP": framework.RealIP(r),
-				"Status":   wr.status,
-				"Len":      wr.total,
-				"Cf-ray":   r.Header.Get("CF-RAY"),
-			},
-		).Debug(http.StatusText(wr.status))
-	}
+func Logger() framework.GlobalMiddleware {
+	return &logger{}
 }
