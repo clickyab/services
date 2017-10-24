@@ -36,8 +36,9 @@ type uriParameter struct {
 
 var (
 	transferList = map[string]swaggerType{
-		"time.Time":    {"type": "string", "format": "dateTime"},
-		"sql.NullTime": {"type": "string", "format": "dateTime"},
+		"time.Time":                                                      {"type": "string", "format": "dateTime"},
+		"sql.NullTime":                                                   {"type": "string", "format": "dateTime"},
+		"mysql.NullTime":                                                 {"type": "string", "format": "dateTime"},
 		"github.com/clickyab/services/postgres/models/common.NullTime":   {"type": "string", "format": "dateTime"},
 		"github.com/clickyab/services/postgres/models/common.NullString": {"type": "string"},
 		"modules/balance/acc.Money":                                      {"type": "integer"},
@@ -242,7 +243,7 @@ func (rg *swaggerGenerator) mix() error {
 
 	swagger := struct {
 		Swagger string
-		Info    struct {
+		Info struct {
 			Version     string
 			Title       string
 			Description string
