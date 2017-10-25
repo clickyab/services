@@ -38,7 +38,7 @@ var (
 	transferList = map[string]swaggerType{
 		"time.Time":                                                      {"type": "string", "format": "dateTime"},
 		"sql.NullTime":                                                   {"type": "string", "format": "dateTime"},
-		"mysql.NullTime":                                                 {"type": "string", "format": "dateTime"},
+		"github.com/clickyab/services/mysql.NullTime":                    {"type": "string", "format": "dateTime"},
 		"github.com/clickyab/services/postgres/models/common.NullTime":   {"type": "string", "format": "dateTime"},
 		"github.com/clickyab/services/postgres/models/common.NullString": {"type": "string"},
 		"modules/balance/acc.Money":                                      {"type": "integer"},
