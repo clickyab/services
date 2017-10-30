@@ -26,7 +26,8 @@ func (hook) Initialize(ctx context.Context) {
 	}
 	hook, err := logrus_fluent.New(host.String(), port.Int())
 	if err != nil {
-		logrus.Error("fluentd logger failed, if this is in production check for the problem")
+		logrus.Errorf("fluentd logger failed, if this is in production check for the problem: %s", err)
+		return
 	}
 
 	// set custom fire level

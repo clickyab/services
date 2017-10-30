@@ -1,10 +1,10 @@
 package config
 
 import (
+	"io/ioutil"
 	"runtime"
 
 	"github.com/clickyab/services/assert"
-
 	"github.com/fzerorubigd/expand"
 	"github.com/sirupsen/logrus"
 	onion "gopkg.in/fzerorubigd/onion.v3"
@@ -76,6 +76,7 @@ func SetConfigParameter() {
 	} else {
 		logrus.SetFormatter(&logrus.TextFormatter{ForceColors: false, DisableColors: true})
 		logrus.SetLevel(logrus.WarnLevel)
+		logrus.SetOutput(ioutil.Discard) // Discard the stdout logging
 	}
 
 	numcpu := cfg.MaxCPUAvailable
