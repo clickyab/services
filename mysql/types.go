@@ -34,7 +34,10 @@ type NullBool struct {
 // MarshalJSON try to marshaling to json
 func (nt NullBool) MarshalJSON() ([]byte, error) {
 	if nt.Valid {
-		return []byte(fmt.Sprintf(`%d`, nt.Bool)), nil
+		if nt.Bool {
+			return []byte("true"), nil
+		}
+		return []byte("false"), nil
 	}
 
 	return []byte(nullString), nil
@@ -142,6 +145,34 @@ type GenericJSONField map[string]interface{}
 
 // StringJSONArray is use to handle string to string map in postgres
 type StringJSONArray []string
+
+// StringMapJSONArray is use to handle string to string map in postgres
+type StringMapJSONArray map[string][]string
+
+// Value value func for StringMapJSONArray structure
+func (is StringMapJSONArray) Value() (driver.Value, error) {
+	b, err := json.Marshal(is)
+	if err != nil {
+		return nil, err
+	}
+	return b, nil
+}
+
+// Scan func for StringMapJSONArray structure
+func (is *StringMapJSONArray) Scan(src interface{}) error {
+	var b []byte
+	switch src.(type) {
+	case []byte:
+		b = src.([]byte)
+	case string:
+		b = []byte(src.(string))
+	case nil:
+		b = make([]byte, 0)
+	default:
+		return errors.New("unsupported type")
+	}
+	return json.Unmarshal(b, is)
+}
 
 // Scan convert the json array ino string slice
 func (is *Int64Slice) Scan(src interface{}) error {
