@@ -6,6 +6,7 @@ import (
 
 	"github.com/clickyab/services/aredis"
 	"github.com/clickyab/services/kv"
+	"github.com/mitchellh/mapstructure"
 )
 
 type kiwiRedis struct {
@@ -84,6 +85,11 @@ func (kr *kiwiRedis) AllKeys() map[string]string {
 
 	kr.v = r
 	return kr.v
+}
+
+// AllKeysInStruct decode all store keys to the input
+func (kr *kiwiRedis) AllKeysInStruct(in interface{}) error {
+	return mapstructure.Decode(kr.AllKeys(), in)
 }
 
 // Save the entire keys (mostly first time)
