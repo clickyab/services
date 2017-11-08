@@ -12,6 +12,8 @@ import (
 	// Make sure postgres is included in any build
 	"os"
 
+	"fmt"
+
 	"github.com/clickyab/services/migration"
 	"github.com/clickyab/services/safe"
 	_ "github.com/lib/pq" // Make sure the pg is available
@@ -47,17 +49,26 @@ func (g gorpLogger) Printf(format string, v ...interface{}) {
 // Initialize the modules, its safe to call this as many time as you want.
 func (modelsInitializer) Initialize(ctx context.Context) {
 	var err error
-	db, err = sql.Open("postgres", cfg.DSN)
+	dsn := fmt.Sprintf(
+		"host=%s port=%d user=%s password=%s dbname=%s sslmode=%s",
+		host.String(),
+		port.Int(),
+		user.String(),
+		pass.String(),
+		dbname.String(),
+		sslmode.String(),
+	)
+	db, err = sql.Open("postgres", dsn)
 	assert.Nil(err)
 
-	db.SetMaxIdleConns(cfg.MaxIdleConnection)
-	db.SetMaxOpenConns(cfg.MaxConnection)
+	db.SetMaxIdleConns(maxIdle.Int())
+	db.SetMaxOpenConns(maxCon.Int())
 
 	safe.Try(db.Ping, retryMax.Duration())
 
 	dbmap = &gorp.DbMap{Db: db, Dialect: gorp.PostgresDialect{}}
 
-	if cfg.DevelMode {
+	if develMode.Bool() {
 		logger := gorpLogger{}
 		dbmap.TraceOn("[DB]", logger)
 	} else {
@@ -98,7 +109,7 @@ func doMigration() {
 	//		logrus.Info("%d migration applied", n)
 	//	}
 	//}
-	if cfg.DevelMode {
+	if develMode.Bool() {
 		migration.List(&model.Manager{}, os.Stdout)
 	}
 }
