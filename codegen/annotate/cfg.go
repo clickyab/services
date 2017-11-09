@@ -7,7 +7,7 @@ import (
 )
 
 var (
-	group = regexp.MustCompile(`(?ms)^\s*(/[*]|[/]{2}|)\s*@(\S+)\s*{([^}]+)}\s*$`)
+	group = regexp.MustCompile(`(?ms)^\s*(/[*]|[/]{2}|)\s*@(\S+)\s*{([^}]*)}\s*$`)
 	line  = regexp.MustCompile(`\s*([/]{2}\s*|)((\S+)\s*=(.*)|.*)`)
 )
 
