@@ -22,25 +22,25 @@ type GlobalMiddleware interface {
 type Mux interface {
 
 	// GET is a shortcut for mux.Handle("GET", path, handler)
-	GET(string, Handler)
+	GET(string, string, Handler)
 
 	// HEAD is a shortcut for mux.Handle("HEAD", path, handler)
-	HEAD(string, Handler)
+	HEAD(string, string, Handler)
 
 	// OPTIONS is a shortcut for mux.Handle("OPTIONS", path, handler)
-	OPTIONS(string, Handler)
+	OPTIONS(string, string, Handler)
 
 	// POST is a shortcut for mux.Handle("POST", path, handler)
-	POST(string, Handler)
+	POST(string, string, Handler)
 
 	// PUT is a shortcut for mux.Handle("PUT", path, handler)
-	PUT(string, Handler)
+	PUT(string, string, Handler)
 
 	// PATCH is a shortcut for mux.Handle("PATCH", path, handler)
-	PATCH(string, Handler)
+	PATCH(string, string, Handler)
 
 	// DELETE is a shortcut for mux.Handle("DELETE", path, handler)
-	DELETE(string, Handler)
+	DELETE(string, string, Handler)
 
 	// NewGroup creates a new routes group with the provided path prefix.
 	// All routes added to the returned group will have the path prepended.

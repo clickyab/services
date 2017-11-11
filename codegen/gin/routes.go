@@ -96,7 +96,7 @@ func ({{ .GroupRec }} *{{ .StructName }}) Routes(r framework.Mux) {
 	m{{ $key }} = append(m{{ $key }}, {{ $.GroupRec }}.{{ $route.RouteFuncMiddleware|strip_type }}()...){{ end }}
 	{{ if $route.Payload }} // Make sure payload is the last middleware
 	m{{ $key }} = append(m{{ $key }}, middleware.PayloadUnMarshallerGenerator({{$route.Payload}}{})){{ end }}
-	group.{{ $route.Method }}("{{ $route.Route }}",framework.Mix({{ $.GroupRec }}.{{ $route.Function|strip_type }}, m{{ $key }}...))
+	group.{{ $route.Method }}("{{ $.GroupPkg }}-{{ $.StructName }}-{{ $route.Function|strip_type }}", "{{ $route.Route }}",framework.Mix({{ $.GroupRec }}.{{ $route.Function|strip_type }}, m{{ $key }}...))
 	// End route with key {{ $key }}
 	{{ end }}
 	{{ end }}

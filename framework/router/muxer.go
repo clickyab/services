@@ -1,12 +1,15 @@
 package router
 
 import (
+	"path/filepath"
+
 	"github.com/clickyab/services/framework"
 	"github.com/rs/xhandler"
 	"github.com/rs/xmux"
 )
 
 type xmuxer struct {
+	path       string
 	root       *xmux.Mux
 	engine     *xmux.Mux
 	group      *xmux.Group
@@ -19,6 +22,7 @@ func (x *xmuxer) getFunc(handler framework.Handler) xhandler.HandlerFuncC {
 
 func (x *xmuxer) NewGroup(path string) framework.Mux {
 	xm := &xmuxer{
+		path:       filepath.Join(x.path, path),
 		root:       x.root,
 		engine:     nil,
 		middleware: x.middleware,
@@ -36,7 +40,8 @@ func (x *xmuxer) RootMux() *xmux.Mux {
 	return x.root
 }
 
-func (x *xmuxer) GET(path string, handler framework.Handler) {
+func (x *xmuxer) GET(name string, path string, handler framework.Handler) {
+	AddRoute(name, filepath.Join(x.path, path))
 	if x.engine != nil {
 		x.engine.GET(path, x.getFunc(handler))
 		return
@@ -44,7 +49,8 @@ func (x *xmuxer) GET(path string, handler framework.Handler) {
 	x.group.GET(path, x.getFunc(handler))
 }
 
-func (x *xmuxer) HEAD(path string, handler framework.Handler) {
+func (x *xmuxer) HEAD(name string, path string, handler framework.Handler) {
+	AddRoute(name, filepath.Join(x.path, path))
 	if x.engine != nil {
 		x.engine.HEAD(path, x.getFunc(handler))
 		return
@@ -52,7 +58,8 @@ func (x *xmuxer) HEAD(path string, handler framework.Handler) {
 	x.group.HEAD(path, x.getFunc(handler))
 }
 
-func (x *xmuxer) OPTIONS(path string, handler framework.Handler) {
+func (x *xmuxer) OPTIONS(name string, path string, handler framework.Handler) {
+	AddRoute(name, filepath.Join(x.path, path))
 	if x.engine != nil {
 		x.engine.HEAD(path, x.getFunc(handler))
 		return
@@ -60,7 +67,8 @@ func (x *xmuxer) OPTIONS(path string, handler framework.Handler) {
 	x.group.HEAD(path, x.getFunc(handler))
 }
 
-func (x *xmuxer) POST(path string, handler framework.Handler) {
+func (x *xmuxer) POST(name string, path string, handler framework.Handler) {
+	AddRoute(name, filepath.Join(x.path, path))
 	if x.engine != nil {
 		x.engine.POST(path, x.getFunc(handler))
 		return
@@ -68,7 +76,8 @@ func (x *xmuxer) POST(path string, handler framework.Handler) {
 	x.group.POST(path, x.getFunc(handler))
 }
 
-func (x *xmuxer) PUT(path string, handler framework.Handler) {
+func (x *xmuxer) PUT(name string, path string, handler framework.Handler) {
+	AddRoute(name, filepath.Join(x.path, path))
 	if x.engine != nil {
 		x.engine.PUT(path, x.getFunc(handler))
 		return
@@ -76,7 +85,8 @@ func (x *xmuxer) PUT(path string, handler framework.Handler) {
 	x.group.PUT(path, x.getFunc(handler))
 }
 
-func (x *xmuxer) PATCH(path string, handler framework.Handler) {
+func (x *xmuxer) PATCH(name string, path string, handler framework.Handler) {
+	AddRoute(name, filepath.Join(x.path, path))
 	if x.engine != nil {
 		x.engine.PATCH(path, x.getFunc(handler))
 		return
@@ -84,7 +94,8 @@ func (x *xmuxer) PATCH(path string, handler framework.Handler) {
 	x.group.PATCH(path, x.getFunc(handler))
 }
 
-func (x *xmuxer) DELETE(path string, handler framework.Handler) {
+func (x *xmuxer) DELETE(name string, path string, handler framework.Handler) {
+	AddRoute(name, filepath.Join(x.path, path))
 	if x.engine != nil {
 		x.engine.DELETE(path, x.getFunc(handler))
 		return
