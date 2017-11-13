@@ -91,7 +91,12 @@ func (kr *kiwiRedis) Save(t time.Duration) error {
 	kr.lock.Lock()
 	defer kr.lock.Unlock()
 
-	res := aredis.Client.HMSet(kr.key, kr.v)
+	tmp := make(map[string]interface{}, len(kr.v))
+	for i := range kr.v {
+		tmp[i] = kr.v[i]
+	}
+
+	res := aredis.Client.HMSet(kr.key, tmp)
 	if res.Err() != nil {
 		return res.Err()
 	}
