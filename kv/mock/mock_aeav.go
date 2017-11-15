@@ -32,14 +32,14 @@ func (m *AKiwi) Key() string {
 }
 
 // IncSubKey for increasing sub key
-func (m *AKiwi) IncSubKey(key string, value int64) kv.AKiwi {
+func (m *AKiwi) IncSubKey(key string, value int64) int64 {
 	t := m.Data[key]
 	m.Data[key] = t + value
-	return m
+	return m.Data[key]
 }
 
 // DecSubKey for decreasing sub key
-func (m *AKiwi) DecSubKey(key string, value int64) kv.AKiwi {
+func (m *AKiwi) DecSubKey(key string, value int64) int64 {
 	return m.IncSubKey(key, value*-1)
 }
 
@@ -53,19 +53,13 @@ func (m *AKiwi) AllKeys() map[string]int64 {
 	return m.Data
 }
 
-// Save the entire keys (mostly first time)
-func (m *AKiwi) Save(t time.Duration) error {
-	m.Duration = t
-	return nil
-}
-
 // TTL return the expiration time of this
 func (m *AKiwi) TTL() time.Duration {
 	return m.Duration
 }
 
 // NewAtomicMockStore is the new mock store
-func NewAtomicMockStore(key string) kv.AKiwi {
+func NewAtomicMockStore(key string, dur time.Duration) kv.AKiwi {
 	if k, ok := atomicStore[key]; ok {
 		return k
 	}
@@ -79,6 +73,7 @@ func NewAtomicMockStore(key string) kv.AKiwi {
 	m := &AKiwi{
 		MasterKey: key,
 		Data:      data,
+		Duration:  dur,
 	}
 
 	atomicStore[key] = m
