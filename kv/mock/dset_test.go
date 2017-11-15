@@ -9,7 +9,7 @@ import (
 )
 
 func TestManager(t *testing.T) {
-	kv.Register(nil, nil, nil, NewMockDsetStore, nil, nil, nil)
+	kv.Register(nil, nil, nil, NewMockDsetStore, nil, nil, nil, nil)
 
 	convey.Convey("test set", t, func() {
 		d := kv.NewDistributedSet("test_key")

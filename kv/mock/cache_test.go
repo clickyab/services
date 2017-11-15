@@ -44,7 +44,7 @@ func (cp *able) String() string {
 
 func TestCacheSystem(t *testing.T) {
 	ch := NewCacheMock()
-	kv.Register(nil, nil, nil, nil, nil, ch, nil)
+	kv.Register(nil, nil, nil, nil, nil, ch, nil, nil)
 	Convey("Test simple cacheFactory", t, func() {
 		tmp := able{
 			Key:   "test_key",
@@ -68,7 +68,7 @@ func TestCacheSystem(t *testing.T) {
 		So(kv.Hit("NOT VALID KEY", &t3), ShouldNotBeNil)
 	})
 	ch = NewCacheMock()
-	kv.Register(nil, nil, nil, nil, nil, ch, nil)
+	kv.Register(nil, nil, nil, nil, nil, ch, nil, nil)
 	Convey("Test cacheFactory wrapper", t, func() {
 		tmp := notable{
 			Key:   "test_key",

@@ -10,7 +10,7 @@ import (
 )
 
 func TestDlockSpec(t *testing.T) {
-	kv.Register(nil, nil, NewMockDistributedLocker, nil, nil, nil, nil)
+	kv.Register(nil, nil, NewMockDistributedLocker, nil, nil, nil, nil, nil)
 	Convey("Test dlock locally", t, func() {
 
 		Convey("test if the ttl is passed", func() {
