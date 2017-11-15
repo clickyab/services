@@ -13,7 +13,8 @@ func Register(eav KiwiFactory,
 	dset DistributedSetFactory,
 	at StoreAtomicFactory,
 	cache CacheProvider,
-	scanner ScannerFactory) {
+	scanner ScannerFactory,
+	OneTime OneTimeFactory) {
 	regLock.Lock()
 	defer regLock.Unlock()
 
@@ -24,4 +25,5 @@ func Register(eav KiwiFactory,
 	atomicFactory = at
 	cacheFactory = cache
 	scannerFactory = scanner
+	otFactory = OneTime
 }

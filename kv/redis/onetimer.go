@@ -4,11 +4,12 @@ import (
 	"time"
 
 	"github.com/clickyab/services/aredis"
+	"github.com/clickyab/services/kv"
 )
 
 type oneTimer struct {
-	d   time.Duration
 	key string
+	d   time.Duration
 }
 
 func (ot *oneTimer) Key() string {
@@ -30,4 +31,8 @@ func (ot *oneTimer) Set(s string) string {
 	}
 	_ = aredis.Client.Expire(ot.key, ot.d) // ignore error
 	return v.Val()
+}
+
+func newOneTimer(key string, d time.Duration) kv.OneTimeSet {
+	return &oneTimer{key, d}
 }

@@ -8,6 +8,8 @@ import (
 var (
 	onetimes = make(map[string]string)
 	otLock   sync.Mutex
+
+	_ oneTimer
 )
 
 type oneTimer struct {

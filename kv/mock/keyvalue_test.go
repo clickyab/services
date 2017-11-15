@@ -12,7 +12,7 @@ import (
 )
 
 func TestSpec(t *testing.T) {
-	kv.Register(NewMockStore, nil, nil, nil, nil, nil, nil)
+	kv.Register(NewMockStore, nil, nil, nil, nil, nil, nil, nil)
 
 	Convey("Test keyvalue store", t, func() {
 		store := kv.NewEavStore("test_key")
