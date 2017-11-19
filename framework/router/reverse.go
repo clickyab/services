@@ -30,6 +30,13 @@ func AddRoute(name, path string) {
 	reverse[name] = path
 }
 
+// MustGetPath return the path for this route if its already registered or panic if it doesn't
+func MustGetPath(name string, params map[string]string, catch ...string) string {
+	p, err := Path(name, params, catch...)
+	assert.Nil(err)
+	return p
+}
+
 // Path return the path for this route if its already registered
 func Path(name string, params map[string]string, catch ...string) (string, error) {
 	lock.RLock()
