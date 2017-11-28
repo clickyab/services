@@ -11,15 +11,15 @@ type AKiwi interface {
 	// Key return the parent key
 	Key() string
 	// IncSetSubKey for increasing sub key
-	IncSubKey(key string, value int64) int64
+	IncSubKey(string, int64) int64
 	// DecSetSubKey for decreasing sub key
-	DecSubKey(key string, value int64) int64
+	DecSubKey(string, int64) int64
 	// SubKey return a key
-	SubKey(key string) int64
+	SubKey(string) int64
 	// AllKeys from the store
 	AllKeys() map[string]int64
-	// Drop the entire eav store
-	Drop() error
+	// Drop the entire eav store, if there is some parameter then drop that keys only
+	Drop(...string) error
 	// TTL return the time to expire this
 	TTL() time.Duration
 }

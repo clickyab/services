@@ -25,12 +25,21 @@ func (kr *atomicKiwiRedis) TTL() time.Duration {
 	return r
 }
 
-func (kr *atomicKiwiRedis) Drop() error {
+func (kr *atomicKiwiRedis) Drop(s ...string) error {
 	kr.Lock()
 	defer kr.Unlock()
 
-	kr.v = make(map[string]int64)
-	d := aredis.Client.Del(kr.key)
+	if len(s) == 0 {
+		kr.v = make(map[string]int64)
+		d := aredis.Client.Del(kr.key)
+		return d.Err()
+	}
+
+	for i := range s {
+		delete(kr.v, s[i])
+	}
+	// Ignore the error
+	d := aredis.Client.HDel(kr.key, s...)
 	return d.Err()
 }
 

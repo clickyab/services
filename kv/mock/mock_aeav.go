@@ -19,10 +19,16 @@ var (
 )
 
 // Drop the key
-func (m *AKiwi) Drop() error {
-	m.Data = make(map[string]int64)
-	pre[m.MasterKey] = nil
+func (m *AKiwi) Drop(s ...string) error {
+	if len(s) == 0 {
+		m.Data = make(map[string]int64)
+		pre[m.MasterKey] = nil
 
+		return nil
+	}
+	for i := range s {
+		delete(m.Data, s[i])
+	}
 	return nil
 }
 
