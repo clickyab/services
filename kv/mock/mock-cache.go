@@ -15,22 +15,21 @@ type cacheMock struct {
 }
 
 // Do is called to store the cache
-func (ch *cacheMock) Do(e kv.Cacheable, t time.Duration) error {
+func (ch *cacheMock) Do(k string, e kv.Serializable, t time.Duration) error {
 	ch.lock.Lock()
 	defer ch.lock.Unlock()
-	name := e.String()
 	target := &bytes.Buffer{}
 	err := e.Decode(target)
 	if err != nil {
 		return err
 	}
 
-	ch.data[name] = target.Bytes()
+	ch.data[k] = target.Bytes()
 	return nil
 }
 
 // Hit called when we need to load the cache
-func (ch *cacheMock) Hit(key string, e kv.Cacheable) error {
+func (ch *cacheMock) Hit(key string, e kv.Serializable) error {
 	ch.lock.RLock()
 	defer ch.lock.RUnlock()
 	data, ok := ch.data[key]

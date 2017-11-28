@@ -137,7 +137,7 @@ func (in *initMysql) Initialize(ctx context.Context) {
 		safe.Try(func() error { return ping(dbReplicated.Bool(), rdbmap...) }, retryMax.Duration())
 
 		fillSafeArray()
-		safe.GoRoutine(func() { updateRdbMap(ctx) })
+		safe.GoRoutine(context.Background(), func() { updateRdbMap(ctx) })
 
 		doMigration()
 		// Now that all initialization are done, lets initialize our modules

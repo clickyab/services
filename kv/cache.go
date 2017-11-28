@@ -14,31 +14,23 @@ type Serializable interface {
 	Encode(io.Reader) error
 }
 
-// Cacheable is the object that can be cached into
-type Cacheable interface {
-	Serializable
-
-	String() string
-}
-
 // CacheProvider is the cacheFactory backend
 type CacheProvider interface {
 	// Do is called to store the cacheFactory
-	Do(Cacheable, time.Duration) error
+	Do(string, Serializable, time.Duration) error
 	// Hit called when we need to load the cacheFactory
-	Hit(string, Cacheable) error
+	Hit(string, Serializable) error
 }
 
 // CacheWrapper is a provider with support for inner entity
 type CacheWrapper interface {
-	Cacheable
+	Serializable
 	// Entity return the cached object
 	Entity() interface{}
 }
 
 type cachable struct {
 	entity interface{}
-	key    string
 }
 
 var cacheFactory CacheProvider
@@ -55,27 +47,23 @@ func (cp *cachable) Encode(i io.Reader) error {
 	return dnc.Decode(cp.entity)
 }
 
-func (cp *cachable) String() string {
-	return cp.key
-}
-
 func (cp *cachable) Entity() interface{} {
 	return cp.entity
 }
 
 // Do the entity
-func Do(e Cacheable, t time.Duration, err error) error {
+func Do(k string, e Serializable, t time.Duration, err error) error {
 	if err != nil {
 		return err
 	}
 	regLock.RLock()
 	defer regLock.RUnlock()
 
-	return cacheFactory.Do(e, t)
+	return cacheFactory.Do(k, e, t)
 }
 
 // Hit the cacheFactory
-func Hit(key string, out Cacheable) error {
+func Hit(key string, out Serializable) error {
 	regLock.RLock()
 	defer regLock.RUnlock()
 
@@ -83,9 +71,8 @@ func Hit(key string, out Cacheable) error {
 }
 
 // CreateWrapper return an cachable object for this ntt
-func CreateWrapper(key string, ntt interface{}) CacheWrapper {
+func CreateWrapper(ntt interface{}) CacheWrapper {
 	return &cachable{
-		key:    key,
 		entity: ntt,
 	}
 }

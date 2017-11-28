@@ -26,8 +26,8 @@ func mkTitle(err interface{}, title error, commits int64, short string) error {
 }
 
 // GoRoutine is a safe go routine system with recovery and a way to inform finish of the routine
-func GoRoutine(f func(), extra ...interface{}) context.Context {
-	ctx, cl := context.WithCancel(context.Background())
+func GoRoutine(c context.Context, f func(), extra ...interface{}) context.Context {
+	ctx, cl := context.WithCancel(c)
 	go func() {
 		defer cl()
 		defer func() {
@@ -47,11 +47,11 @@ func GoRoutine(f func(), extra ...interface{}) context.Context {
 }
 
 // ContinuesGoRoutine is a safe go routine system with recovery, its continue after recovery
-func ContinuesGoRoutine(f func(context.CancelFunc), delay time.Duration, extra ...interface{}) {
-	parent, cnl := context.WithCancel(context.Background())
+func ContinuesGoRoutine(c context.Context, f func(context.CancelFunc), delay time.Duration, extra ...interface{}) context.Context {
+	parent, cnl := context.WithCancel(c)
 	go func() {
 		for i := 1; ; i++ {
-			ctx := GoRoutine(func() { f(cnl) }, extra...)
+			ctx := GoRoutine(c, func() { f(cnl) }, extra...)
 			select {
 			case <-ctx.Done():
 				time.Sleep(delay)
@@ -62,6 +62,8 @@ func ContinuesGoRoutine(f func(context.CancelFunc), delay time.Duration, extra .
 			}
 		}
 	}()
+
+	return parent
 }
 
 // Routine is a safe routine system with recovery

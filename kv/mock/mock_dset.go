@@ -4,6 +4,8 @@ import (
 	"sync"
 	"time"
 
+	"context"
+
 	"github.com/clickyab/services/kv"
 	"github.com/clickyab/services/safe"
 )
@@ -58,7 +60,7 @@ func (d *distributedSet) Save(t time.Duration) error {
 	d.adds = nil
 	distributedSets[d.key] = d
 	d.once.Do(func() {
-		safe.GoRoutine(d.ttl)
+		safe.GoRoutine(context.Background(), d.ttl)
 	})
 	return nil
 }

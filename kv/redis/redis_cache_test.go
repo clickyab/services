@@ -48,7 +48,7 @@ func TestCacheSystem(t *testing.T) {
 			Test:  "Hi",
 			Value: 10,
 		}
-		So(ch.Do(&tmp, time.Hour), ShouldBeNil)
+		So(ch.Do(tmp.String(), &tmp, time.Hour), ShouldBeNil)
 		var (
 			t3 able
 		)
