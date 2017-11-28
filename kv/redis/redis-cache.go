@@ -21,8 +21,8 @@ func sha(k string) string {
 }
 
 // Do is called to store the cache
-func (cache) Do(e kv.Cacheable, t time.Duration) error {
-	name := "CACHE_" + sha(e.String())
+func (cache) Do(k string, e kv.Serializable, t time.Duration) error {
+	name := "CACHE_" + sha(k)
 	target := &bytes.Buffer{}
 	err := e.Decode(target)
 	if err != nil {
@@ -34,7 +34,7 @@ func (cache) Do(e kv.Cacheable, t time.Duration) error {
 }
 
 // Hit called when we need to load the cache
-func (cache) Hit(key string, e kv.Cacheable) error {
+func (cache) Hit(key string, e kv.Serializable) error {
 	name := "CACHE_" + sha(key)
 	res := aredis.Client.Get(name)
 	if err := res.Err(); err != nil {

@@ -13,7 +13,7 @@ node {
         sh "docker rm -f $REDIS_NAME || true"
         sh "docker run -d --rm --name $REDIS_NAME redis:alpine"
         def TEST_SERVICES_REDIS_ADDRESS=sh( script: "docker inspect -f '{{.NetworkSettings.IPAddress}}' $REDIS_NAME", returnStdout: true).trim()
-        sh "./bin/ci-test.sh test"
+        sh "TEST_SERVICES_REDIS_ADDRESS=${TEST_SERVICES_REDIS_ADDRESS} ./bin/ci-test.sh test"
         sh "docker rm -f $REDIS_NAME"
     }
 }

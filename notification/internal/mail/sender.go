@@ -56,7 +56,7 @@ func Send(subject, msg string, from EmailAddress, to ...EmailAddress) {
 
 	// No need to wait for result. its better to have the user and just record the
 	// exception here :)
-	safe.GoRoutine(func() {
+	safe.GoRoutine(context.Background(), func() {
 		assert.Nil(dialer.DialAndSend(m))
 	})
 }

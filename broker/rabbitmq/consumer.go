@@ -72,7 +72,7 @@ func (cn consumer) RegisterConsumer(consumer broker.Consumer) error {
 	if err != nil {
 		return err
 	}
-	safe.ContinuesGoRoutine(func(cnl context.CancelFunc) {
+	safe.ContinuesGoRoutine(context.Background(), func(cnl context.CancelFunc) {
 		consumerTag := <-random.ID
 		delivery, err := c.Consume(q.Name, consumerTag, false, false, false, false, nil)
 		if err != nil {

@@ -51,8 +51,8 @@ func TestCacheSystem(t *testing.T) {
 			Test:  "Hi",
 			Value: 10,
 		}
-		So(kv.Do(&tmp, time.Hour, errors.New("example")), ShouldNotBeNil)
-		So(kv.Do(&tmp, time.Hour, nil), ShouldBeNil)
+		So(kv.Do(tmp.Key, &tmp, time.Hour, errors.New("example")), ShouldNotBeNil)
+		So(kv.Do(tmp.Key, &tmp, time.Hour, nil), ShouldBeNil)
 		has, v := GetData(ch, tmp.Key)
 		So(has, ShouldBeTrue)
 		var (
@@ -75,19 +75,19 @@ func TestCacheSystem(t *testing.T) {
 			Test:  "Hi",
 			Value: 10,
 		}
-		wrap := kv.CreateWrapper(tmp.Key, &tmp)
-		So(kv.Do(wrap, time.Hour, errors.New("example")), ShouldNotBeNil)
-		So(kv.Do(wrap, time.Hour, nil), ShouldBeNil)
+		wrap := kv.CreateWrapper(&tmp)
+		So(kv.Do(tmp.Key, wrap, time.Hour, errors.New("example")), ShouldNotBeNil)
+		So(kv.Do(tmp.Key, wrap, time.Hour, nil), ShouldBeNil)
 		has, _ := GetData(ch, tmp.Key)
 		So(has, ShouldBeTrue)
 		var (
 			t3 notable
 		)
-		wrap2 := kv.CreateWrapper(tmp.Key, &t3)
+		wrap2 := kv.CreateWrapper(&t3)
 		So(kv.Hit(tmp.Key, wrap2), ShouldBeNil)
 		So(t3, ShouldResemble, tmp)
 		So(wrap2.Entity(), ShouldResemble, &tmp)
 
-		So(kv.Hit("NOT VALID KEY", kv.CreateWrapper(tmp.Key, &t3)), ShouldNotBeNil)
+		So(kv.Hit("NOT VALID KEY", kv.CreateWrapper(&t3)), ShouldNotBeNil)
 	})
 }

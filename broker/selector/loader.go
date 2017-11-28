@@ -8,6 +8,8 @@ import (
 
 	"github.com/clickyab/services/broker/rabbitmq"
 
+	"context"
+
 	"github.com/sirupsen/logrus"
 )
 
@@ -32,6 +34,7 @@ func (cfg) Loaded() {
 		p := mock.GetChannelBroker()
 		broker.SetActiveBroker(p)
 		safe.GoRoutine(
+			context.Background(),
 			func() {
 				ch := mock.GetChannel(10)
 				for j := range ch {
