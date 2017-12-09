@@ -1,6 +1,7 @@
 package broker
 
 import (
+	"context"
 	"sync"
 
 	"github.com/clickyab/services/assert"
@@ -39,7 +40,7 @@ type Consumer interface {
 	// Queue is the queue that this want to listen to
 	Queue() string
 	// Consume return a channel to put jobs into
-	Consume() chan<- Delivery
+	Consume(context.Context) chan<- Delivery
 }
 
 // Publisher is the base broker interface in system
