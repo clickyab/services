@@ -24,7 +24,7 @@ func sha(k string) string {
 func (cache) Do(k string, e kv.Serializable, t time.Duration) error {
 	name := "CACHE_" + sha(k)
 	target := &bytes.Buffer{}
-	err := e.Decode(target)
+	err := e.Encode(target)
 	if err != nil {
 		return err
 	}
@@ -45,5 +45,5 @@ func (cache) Hit(key string, e kv.Serializable) error {
 		return err
 	}
 	buf := bytes.NewBufferString(data)
-	return e.Encode(buf)
+	return e.Decode(buf)
 }
