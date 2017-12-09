@@ -19,7 +19,7 @@ func (ch *cacheMock) Do(k string, e kv.Serializable, t time.Duration) error {
 	ch.lock.Lock()
 	defer ch.lock.Unlock()
 	target := &bytes.Buffer{}
-	err := e.Decode(target)
+	err := e.Encode(target)
 	if err != nil {
 		return err
 	}
@@ -38,7 +38,7 @@ func (ch *cacheMock) Hit(key string, e kv.Serializable) error {
 	}
 
 	buf := bytes.NewReader(data)
-	return e.Encode(buf)
+	return e.Decode(buf)
 }
 
 // GetData is used to get mock key for testing

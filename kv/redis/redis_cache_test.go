@@ -21,14 +21,14 @@ type able struct {
 	Value int
 }
 
-// Decode try to decode cookie profile into gob
-func (cp *able) Decode(w io.Writer) error {
+// Encode try to decode cookie profile into gob
+func (cp *able) Encode(w io.Writer) error {
 	enc := json.NewEncoder(w)
 	return enc.Encode(cp)
 }
 
-// Encode try to encode cookie profile from gob
-func (cp *able) Encode(i io.Reader) error {
+// Decode try to encode cookie profile from gob
+func (cp *able) Decode(i io.Reader) error {
 	dnc := json.NewDecoder(i)
 	return dnc.Decode(cp)
 }
