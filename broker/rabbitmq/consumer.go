@@ -72,7 +72,7 @@ func (cn consumer) RegisterConsumer(consumer broker.Consumer) error {
 	if err != nil {
 		return err
 	}
-	safe.ContinuesGoRoutine(context.Background(), func(cnl context.CancelFunc) {
+	safe.ContinuesGoRoutine(kill, func(cnl context.CancelFunc) {
 		consumerTag := <-random.ID
 		delivery, err := c.Consume(q.Name, consumerTag, false, false, false, false, nil)
 		if err != nil {
@@ -81,7 +81,7 @@ func (cn consumer) RegisterConsumer(consumer broker.Consumer) error {
 			return
 		}
 		logrus.Debug("Worker started")
-		cn.consume(kill, cnl, consumer.Consume(), c, delivery, consumerTag)
+		cn.consume(kill, cnl, consumer.Consume(kill), c, delivery, consumerTag)
 	}, time.Second)
 	return nil
 }
