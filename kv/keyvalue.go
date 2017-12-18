@@ -16,6 +16,8 @@ type Kiwi interface {
 	SubKey(key string) string
 	// AllKeys from the store
 	AllKeys() map[string]string
+	// AllKeysInStruct gets all keys and put it to struct, but remember it need struct tag
+	AllKeysInStruct(interface{}) error
 	// Save the entire keys (mostly first time)
 	Save(time.Duration) error
 	// Drop the entire eav store

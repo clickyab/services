@@ -4,6 +4,7 @@ import (
 	"time"
 
 	"github.com/clickyab/services/kv"
+	"github.com/mitchellh/mapstructure"
 )
 
 // Kiwi is a mock kiwi
@@ -45,6 +46,11 @@ func (m *Kiwi) SubKey(key string) string {
 // AllKeys from the store
 func (m *Kiwi) AllKeys() map[string]string {
 	return m.Data
+}
+
+// AllKeysInStruct gets all keys and decode it to structs
+func (m *Kiwi) AllKeysInStruct(in interface{}) error {
+	return mapstructure.Decode(m.AllKeys(), in)
 }
 
 // Save the entire keys (mostly first time)
