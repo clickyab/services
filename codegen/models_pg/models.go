@@ -64,6 +64,7 @@ type dataModel struct {
 	CreatedAt   *fieldModel
 	UpdatedAt   *fieldModel
 	Transaction []string
+	Fields      string
 }
 
 type dataModels []dataModel
@@ -80,6 +81,7 @@ const tmpl = `
 // Code generated build with models DO NOT EDIT.
 
 package {{ .PackageName }}
+
 {{ range $m := .Data }}
 {{ if $m.Primaries }}
 // Create{{ $m.StructName }} try to save a new {{ $m.StructName }} in database
@@ -125,7 +127,7 @@ func (m *Manager) List{{ $m.StructName|plural }}WithFilter(filter string, params
 	var res []{{ $m.StructName }}
 	_, err := m.GetDbMap().Select(
 		&res,
-		fmt.Sprintf("SELECT * FROM %s %s", {{ $m.StructName }}TableFull, filter),
+		fmt.Sprintf("SELECT %s FROM %s %s",getSelectFields( {{ $m.StructName }}TableFull,""), {{ $m.StructName }}TableFull, filter),
 		params...,
 	)
 	assert.Nil(err)
@@ -176,7 +178,7 @@ func (m *Manager) List{{ $m.StructName|plural }}WithPaginationFilter(
 	// TODO : better pagination without offset and limit
 	_, err := m.GetDbMap().Select(
 		&res,
-		fmt.Sprintf("SELECT * FROM %s %s", {{ $m.StructName }}TableFull, filter),
+		fmt.Sprintf("SELECT %s FROM %s %s",getSelectFields( {{ $m.StructName }}TableFull,""), {{ $m.StructName }}TableFull, filter),
 		params...,
 	)
 	assert.Nil(err)
@@ -195,7 +197,7 @@ func (m* Manager) Find{{ $m.StructName }}By{{ $by.Name }}({{ $by.DB|getvar }} {{
 	var res {{ $m.StructName }}
 	err := m.GetDbMap().SelectOne(
 		&res,
-		fmt.Sprintf("SELECT * FROM %s WHERE {{ $by.DB }}=$1", {{ $m.StructName }}TableFull),
+		fmt.Sprintf("SELECT %s FROM %s WHERE {{ $by.DB }}=$1",getSelectFields( {{ $m.StructName }}TableFull,""), {{ $m.StructName }}TableFull),
 		{{ $by.DB|getvar }},
 	)
 
@@ -212,7 +214,7 @@ func (m *Manager) Filter{{ $m.StructName|plural }}By{{ $by.Name }}({{ $by.DB|get
 	var res []{{ $m.StructName }}
 	_, err := m.GetDbMap().Select(
 		&res,
-		fmt.Sprintf("SELECT * FROM %s WHERE {{ $by.DB }}=$1", {{ $m.StructName }}TableFull),
+		fmt.Sprintf("SELECT %s FROM %s WHERE {{ $by.DB }}=$1",getSelectFields( {{ $m.StructName }}TableFull,""), {{ $m.StructName }}TableFull),
 		{{ $by.DB|getvar }},
 	)
 	assert.Nil(err)
@@ -309,7 +311,8 @@ func (m *Manager) Get{{ .Base|base }}{{ .St|plural }}({{ .Base|getvar }} *{{ .Ba
 	_, err := m.GetDbMap().Select(
 		&res,
 		fmt.Sprintf(
-			"SELECT * FROM %s WHERE {{ .Field.DB }}=$1",
+			"SELECT %s FROM %s WHERE {{ .Field.DB }}=$1",
+			getSelectFields( {{ .St }}TableFull,""),
 			{{ .St }}TableFull,
 		),
 		{{.Base|getvar}}.ID,
@@ -351,6 +354,19 @@ const ({{ range $m := .Data }}
 	// {{ $m.StructName }}TableFull is the {{ $m.StructName }} table name with schema
 	{{ $m.StructName }}TableFull = {{ $m.StructName }}Schema + "." + {{ $m.StructName }}Table
 {{ end }})
+
+func getSelectFields(tb string, alias string) string {
+	if alias != "" {
+		alias +="."
+	}
+	switch tb {
+{{ range $m := .Data }}
+	case {{ $m.StructName }}TableFull:
+		return fmt.Sprintf(` + "`{{ $m.Fields }}`" + `, alias)
+{{ end }}
+	}
+	return ""
+}
 
 // Manager is the model manager for {{ .PackageName }} package
 type Manager struct {
@@ -489,6 +505,36 @@ func stripType(in string) string {
 
 func returnErr(key string) (interface{}, error) {
 	return nil, fmt.Errorf("the key %s is not exists", key)
+}
+
+func getFields(s *humanize.StructType) []string {
+	var res []string
+	for i := range s.Embeds {
+		if t, ok := s.Embeds[i].Type.(*humanize.StructType); ok {
+			res = append(res, getFields(t)...)
+		}
+	}
+
+	for i := range s.Fields {
+		tag := s.Fields[i].Tags
+		t := tag.Get("db_transform")
+		if t == "" {
+			tm := strings.Split(tag.Get("db"), ",")
+			if len(tm) > 0 && trim(tm[0]) != "" && trim(tm[0]) != "-" {
+				t = `%[1]s"` + trim(tm[0]) + `"`
+			}
+		}
+		if t == "" {
+			tm := s.Fields[i].Name
+			if tm[0] >= 'A' && tm[0] <= 'Z' {
+				t = `%[1]s"` + tm + `"`
+			}
+		}
+		if t != "" {
+			res = append(res, t)
+		}
+	}
+	return res
 }
 
 // GetType return all types that this plugin can operate on
@@ -753,7 +799,7 @@ func (r *modelsPlugin) ProcessStructure(
 			data.UpdatedAt = &updatedAt[0]
 		}
 	}
-
+	data.Fields = strings.Join(getFields(f.Type.(*humanize.StructType)), ",")
 	ctx.data[p.FileName] = append(ctx.data[p.FileName], data)
 
 	return ctx, nil
