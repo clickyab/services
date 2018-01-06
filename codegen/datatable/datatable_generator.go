@@ -104,18 +104,18 @@ func ({{ $m.Type|getvar }} {{ $m.Type }}) Filter(u permission.Interface) {{ $m.T
 	{{ end }}
 	{{ range $clm := $m.Column }}
 	{{ if $clm.Edit }}
-	if _, ok := u.HasPermOn("{{ $clm.Edit.Perm }}", {{ $m.Type|getvar }}.OwnerID, {{ $m.Type|getvar }}.ParentID.Int64 {{ $clm.Edit.Scope|scopeArg }}); ok {
+	if _, ok := u.HasOn("{{ $clm.Edit.Perm }}", {{ $m.Type|getvar }}.OwnerID, {{ $m.Type|getvar }}.ParentIDs,{{ $m.Type|getvar }}.DomainID {{ $clm.Edit.Scope|scopeArg }}); ok {
 		action = append(action, "inline_{{$clm.Name}}")
 	}
 	{{ end }}
 	{{ if $clm.HasPerm }}
-	if _, ok := u.HasPermOn("{{ $clm.Perm.Perm }}", {{ $m.Type|getvar }}.OwnerID, {{ $m.Type|getvar }}.ParentID.Int64 {{ $clm.Perm.Scope|scopeArg }}); ok {
+	if _, ok := u.HasOn("{{ $clm.Perm.Perm }}", {{ $m.Type|getvar }}.OwnerID, {{ $m.Type|getvar }}.ParentIDs,{{ $m.Type|getvar }}.DomainID {{ $clm.Perm.Scope|scopeArg }}); ok {
 		res.{{ $clm.Name }} = {{ if $clm.Format }} {{ $m.Type|getvar }}.Format{{ $clm.Name}}()  {{ else }}{{ $m.Type|getvar }}.{{ $clm.Name}} {{ end }}
 	}
 	{{ end }}
 	{{ end }}
 	{{ range $act, $perm := $m.Actions }}
-	if _, ok := u.HasPermOn("{{ $perm.Perm }}", {{ $m.Type|getvar }}.OwnerID, {{ $m.Type|getvar }}.ParentID.Int64 {{ $perm.Scope|scopeArg }}); ok {
+	if _, ok := u.HasOn("{{ $perm.Perm }}", {{ $m.Type|getvar }}.OwnerID, {{ $m.Type|getvar }}.ParentIDs,{{ $m.Type|getvar }}.DomainID {{ $perm.Scope|scopeArg }}); ok {
 		action = append(action, "{{ $act }}")
 	}
 	{{ end }}
@@ -126,14 +126,14 @@ func ({{ $m.Type|getvar }} {{ $m.Type }}) Filter(u permission.Interface) {{ $m.T
 
 func init () {
 	{{ range $act, $perm := $m.Actions }}
-	permission.RegisterPermission("{{ $perm.Perm }}", "{{ $perm.Perm }}");
+	permission.Register("{{ $perm.Perm }}", "{{ $perm.Perm }}");
 	{{ end }}
 	{{ range $c:= $m.Column }}
 		{{ if $c.Perm }}
-		permission.RegisterPermission("{{ $c.Perm.Perm }}", "{{ $c.Perm.Perm }}");
+		permission.Register("{{ $c.Perm.Perm }}", "{{ $c.Perm.Perm }}");
 		{{ end }}
 		{{ if $c.Edit}}
-		permission.RegisterPermission("{{ $c.Edit.Perm }}", "{{ $c.Edit.Perm }}");
+		permission.Register("{{ $c.Edit.Perm }}", "{{ $c.Edit.Perm }}");
 		{{ end }}
 	{{ end }}
 }
@@ -289,8 +289,8 @@ var (
 
 func scopeArg(s string) template.HTML {
 	switch s {
-	case "parent":
-		return template.HTML(`,permission.ScopeParent, permission.ScopeGlobal`)
+	case "self":
+		return template.HTML(`,permission.ScopeSelf, permission.ScopeGlobal`)
 	case "global":
 		return template.HTML(`,permission.ScopeGlobal`)
 	}

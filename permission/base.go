@@ -35,6 +35,8 @@ type InterfaceComplete interface {
 	Interface
 	// GetID return the id of holder
 	GetID() int64
+	// GetDomainID return domain id
+	GetDomainID() int64
 	// GetCurrentToken return the current permission that this object is built on
 	GetCurrentToken() Token
 	// GetCurrentScope return the current scope for this object (maximum)
@@ -44,9 +46,14 @@ type InterfaceComplete interface {
 type complete struct {
 	inner Interface
 
-	id    int64
-	perm  Token
-	scope UserScope
+	id       int64
+	domainID int64
+	perm     Token
+	scope    UserScope
+}
+
+func (pc complete) GetDomainID() int64 {
+	return pc.domainID
 }
 
 var (
@@ -121,10 +128,11 @@ func NewInterfaceComplete(inner Interface, id int64, perm Token, scope UserScope
 	}
 	assert.True(ok, "[BUG] probably there is some thing wrong with code generation")
 	pc := &complete{
-		inner: inner,
-		id:    id,
-		perm:  perm,
-		scope: s,
+		inner:    inner,
+		id:       id,
+		perm:     perm,
+		scope:    s,
+		domainID: domainID,
 	}
 
 	return pc
