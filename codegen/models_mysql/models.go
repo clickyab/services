@@ -298,7 +298,7 @@ func (m *Manager) Get{{ .St|base }}{{ .Base|plural }}({{ .St|getvar }} *{{ .St }
 		&res,
 		fmt.Sprintf(
 			"SELECT %s FROM %s WHERE {{ .Field.DB }}=?",
-			getSelectFields({{ .Base }}TableFull,"")
+			getSelectFields({{ .Base }}TableFull,""),
 			{{ .Base }}TableFull,
 		),
 		{{.St|getvar}}.{{ .Target }},
@@ -331,7 +331,7 @@ func (m *Manager) Get{{ .Base|base }}{{ .St|plural }}({{ .Base|getvar }} *{{ .Ba
 		&res,
 		fmt.Sprintf(
 			"SELECT %s FROM %s WHERE {{ .Field.DB }}=?",
-			getSelectFields({{ .St }}TableFull,"")
+			getSelectFields({{ .St }}TableFull,""),
 			{{ .St }}TableFull,
 		),
 		{{.Base|getvar}}.ID,
