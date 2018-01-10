@@ -4,7 +4,7 @@ import (
 	"bytes"
 	"crypto/md5"
 	"fmt"
-	"html/template"
+	"text/template"
 	"io/ioutil"
 	"path/filepath"
 	"sort"
@@ -534,13 +534,13 @@ func getFields(s *humanize.StructType) []string {
 		if t == "" {
 			tm := strings.Split(tag.Get("db"), ",")
 			if len(tm) > 0 && trim(tm[0]) != "" && trim(tm[0]) != "-" {
-				t = `%[1]s"` + trim(tm[0]) + `"`
+				t = `%[1]s` + trim(tm[0])
 			}
 		}
 		if t == "" {
 			tm := s.Fields[i].Name
 			if tm[0] >= 'A' && tm[0] <= 'Z' {
-				t = `%[1]s"` + tm + `"`
+				t = `%[1]s` + tm
 			}
 		}
 		if t != "" {
