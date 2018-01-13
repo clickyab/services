@@ -4,12 +4,12 @@ import (
 	"bytes"
 	"crypto/md5"
 	"fmt"
-	"text/template"
 	"io/ioutil"
 	"path/filepath"
 	"sort"
 	"strconv"
 	"strings"
+	"text/template"
 
 	"github.com/clickyab/services/codegen/annotate"
 	"github.com/clickyab/services/codegen/plugins"
@@ -537,7 +537,7 @@ func getFields(s *humanize.StructType) []string {
 				t = `%[1]s` + trim(tm[0])
 			}
 		}
-		if t == "" {
+		if t == "" && s.Fields[i].Tags.Get("db") != "-" {
 			tm := s.Fields[i].Name
 			if tm[0] >= 'A' && tm[0] <= 'Z' {
 				t = `%[1]s` + tm
