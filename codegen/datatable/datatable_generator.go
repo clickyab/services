@@ -176,7 +176,7 @@ type list{{ .Data.Entity|ucfirst }}DefResponse struct{
 
 var (
 	list{{ .Data.Entity|ucfirst }}Definition permission.Columns
-	tmp = []byte{}
+	{{ .Data.Entity|ucfirst }}tmp = []byte{}
 )
 
 // @Route {
@@ -259,7 +259,7 @@ func (u *Controller) list{{ .Data.Entity|ucfirst }}(ctx context.Context, w http.
 	}
 
 	h := sha1.New()
-	_, _ = h.Write(tmp)
+	_, _ = h.Write({{ .Data.Entity|ucfirst }}tmp)
 	res.Hash = fmt.Sprintf("%x", h.Sum(nil))
 
 	u.OKResponse(
@@ -276,7 +276,7 @@ func (u *Controller) list{{ .Data.Entity|ucfirst }}(ctx context.Context, w http.
 // }
 func (u *Controller) def{{ .Data.Entity|ucfirst }}(ctx context.Context, w http.ResponseWriter, r *http.Request) {
 	h := sha1.New()
-	_, _ = h.Write(tmp)
+	_, _ = h.Write({{ .Data.Entity|ucfirst }}tmp)
 	hash := fmt.Sprintf("%x", h.Sum(nil))
 	u.OKResponse(
 		w,
@@ -285,8 +285,8 @@ func (u *Controller) def{{ .Data.Entity|ucfirst }}(ctx context.Context, w http.R
 }
 
 func init() {
-	tmp = []byte(` + "` {{ .Data.Columns }} `" + `)
-	assert.Nil(json.Unmarshal(tmp, &list{{ .Data.Entity|ucfirst }}Definition))
+	{{ .Data.Entity|ucfirst }}tmp = []byte(` + "` {{ .Data.Columns }} `" + `)
+	assert.Nil(json.Unmarshal({{ .Data.Entity|ucfirst }}tmp, &list{{ .Data.Entity|ucfirst }}Definition))
 }
 
 `
