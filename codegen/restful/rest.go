@@ -12,8 +12,8 @@ import (
 
 	"sort"
 
-	"clickyab.com/gad/src/assert"
 	"github.com/clickyab/services/array"
+	"github.com/clickyab/services/assert"
 	"github.com/clickyab/services/codegen/annotate"
 	"github.com/clickyab/services/codegen/plugins"
 	"github.com/goraz/humanize"
@@ -151,14 +151,27 @@ func isError(f humanize.File, ty humanize.Type) bool {
 }
 
 func (p *plugin) GetOrder() int {
-	return -10
+	return 99
 }
 
 func (p *plugin) GetType() []string {
 	return []string{"Rest"}
 }
 
-func (p *plugin) Finalize(c interface{}, pkg humanize.Package) error {
+func appendToPkg(pkg *humanize.Package, f string) error {
+	b, err := ioutil.ReadFile(f)
+	if err != nil {
+		return err
+	}
+	fl, err := humanize.ParseFile(string(b), pkg)
+	if err != nil {
+		return err
+	}
+	pkg.Files = append(pkg.Files, fl)
+	return nil
+}
+
+func (p *plugin) Finalize(c interface{}, pkg *humanize.Package) error {
 	ctx, ok := c.(context)
 	if !ok {
 		return fmt.Errorf("invalid context, need %T , got %T", ctx, c)
@@ -173,7 +186,12 @@ func (p *plugin) Finalize(c interface{}, pkg humanize.Package) error {
 		fmt.Println(out.String())
 		return err
 	}
-	return ioutil.WriteFile(ctx.File, res, 0644)
+	err = ioutil.WriteFile(ctx.File, res, 0644)
+	if err != nil {
+		return err
+	}
+
+	return appendToPkg(pkg, ctx.File)
 }
 
 func (p *plugin) FunctionIsSupported(f humanize.File, fn humanize.Function) bool {

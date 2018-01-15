@@ -1,6 +1,7 @@
 package plugins
 
 import (
+	"fmt"
 	"strings"
 	"sync"
 
@@ -22,7 +23,7 @@ type AnnotationPlug interface {
 	GetType() []string
 	// Finalize is called after all the functions are done. the context is the one from the
 	// process
-	Finalize(interface{}, humanize.Package) error
+	Finalize(interface{}, *humanize.Package) error
 }
 
 // AnnotationFunction is the plugin for the functions
@@ -120,64 +121,68 @@ func inArray(n string, h ...string) bool {
 
 // ProcessPackage start the process for a package
 func ProcessPackage(p humanize.Package) error {
-	for f := range p.Files {
-		for t := range p.Files[f].Types {
-			if _, ok := p.Files[f].Types[t].Type.(*humanize.StructType); ok {
+	for _, pl := range plugins {
+		for f := range p.Files {
+			for t := range p.Files[f].Types {
+				if _, ok := p.Files[f].Types[t].Type.(*humanize.StructType); ok {
+					a, err := annotate.LoadFromComment(strings.Join(p.Files[f].Types[t].Docs, "\n"))
+					if err != nil {
+						return err
+					}
+					err = processStructure(&pl, p, *p.Files[f], *p.Files[f].Types[t], a)
+					if err != nil {
+						return err
+					}
+				}
 				a, err := annotate.LoadFromComment(strings.Join(p.Files[f].Types[t].Docs, "\n"))
 				if err != nil {
 					return err
 				}
-				err = processStructure(p, *p.Files[f], *p.Files[f].Types[t], a)
+				err = processTypes(&pl, p, *p.Files[f], *p.Files[f].Types[t], a)
 				if err != nil {
 					return err
 				}
 			}
-			a, err := annotate.LoadFromComment(strings.Join(p.Files[f].Types[t].Docs, "\n"))
-			if err != nil {
-				return err
-			}
-			err = processTypes(p, *p.Files[f], *p.Files[f].Types[t], a)
-			if err != nil {
-				return err
-			}
-		}
-		for fn := range p.Files[f].Functions {
-			a, err := annotate.LoadFromComment(strings.Join(p.Files[f].Functions[fn].Docs, "\n"))
-			if err != nil {
-				return err
-			}
-			err = processFunction(p, *p.Files[f], *p.Files[f].Functions[fn], a)
-			if err != nil {
-				return err
+			for fn := range p.Files[f].Functions {
+				a, err := annotate.LoadFromComment(strings.Join(p.Files[f].Functions[fn].Docs, "\n"))
+				if err != nil {
+					return err
+				}
+				err = processFunction(&pl, p, *p.Files[f], *p.Files[f].Functions[fn], a)
+				if err != nil {
+					return err
+				}
 			}
 		}
+		fmt.Printf("%T => %d \n", pl.p, len(p.Files))
+		if err := finalize(&pl, &p); err != nil {
+			return err
+		}
+		fmt.Printf("%T => %d \n", pl.p, len(p.Files))
 	}
-
 	return nil
 }
 
 // Process all plugins against this function
-func processFunction(pkg humanize.Package, p humanize.File, f humanize.Function, a annotate.AnnotateGroup) error {
+func processFunction(pl *plugin, pkg humanize.Package, p humanize.File, f humanize.Function, a annotate.AnnotateGroup) error {
 	lock.Lock()
 	defer lock.Unlock()
 	for _, item := range a {
-		for i := range plugins {
-			switch plug := plugins[i].p.(type) {
-			case AnnotationFunction:
-				if inArray(item.Name, plug.GetType()...) && plug.FunctionIsSupported(p, f) {
-					c, err := plug.ProcessFunction(
-						plugins[i].context,
-						pkg,
-						p,
-						f,
-						item,
-					)
-					if err != nil {
-						return err
-					}
-					plugins[i].context = c
-					plugins[i].called = true
+		switch plug := pl.p.(type) {
+		case AnnotationFunction:
+			if inArray(item.Name, plug.GetType()...) && plug.FunctionIsSupported(p, f) {
+				c, err := plug.ProcessFunction(
+					pl.context,
+					pkg,
+					p,
+					f,
+					item,
+				)
+				if err != nil {
+					return err
 				}
+				pl.context = c
+				pl.called = true
 			}
 		}
 	}
@@ -186,27 +191,25 @@ func processFunction(pkg humanize.Package, p humanize.File, f humanize.Function,
 }
 
 // Process all plugins against this structures
-func processStructure(pkg humanize.Package, p humanize.File, f humanize.TypeName, a annotate.AnnotateGroup) error {
+func processStructure(pl *plugin, pkg humanize.Package, p humanize.File, f humanize.TypeName, a annotate.AnnotateGroup) error {
 	lock.Lock()
 	defer lock.Unlock()
 	for _, item := range a {
-		for i := range plugins {
-			switch plug := plugins[i].p.(type) {
-			case AnnotationStruct:
-				if inArray(item.Name, plug.GetType()...) && plug.StructureIsSupported(p, f) {
-					c, err := plug.ProcessStructure(
-						plugins[i].context,
-						pkg,
-						p,
-						f,
-						item,
-					)
-					if err != nil {
-						return err
-					}
-					plugins[i].context = c
-					plugins[i].called = true
+		switch plug := pl.p.(type) {
+		case AnnotationStruct:
+			if inArray(item.Name, plug.GetType()...) && plug.StructureIsSupported(p, f) {
+				c, err := plug.ProcessStructure(
+					pl.context,
+					pkg,
+					p,
+					f,
+					item,
+				)
+				if err != nil {
+					return err
 				}
+				pl.context = c
+				pl.called = true
 			}
 		}
 	}
@@ -215,27 +218,25 @@ func processStructure(pkg humanize.Package, p humanize.File, f humanize.TypeName
 }
 
 // Process all plugins against this type
-func processTypes(pkg humanize.Package, p humanize.File, f humanize.TypeName, a annotate.AnnotateGroup) error {
+func processTypes(pl *plugin, pkg humanize.Package, p humanize.File, f humanize.TypeName, a annotate.AnnotateGroup) error {
 	lock.Lock()
 	defer lock.Unlock()
 	for _, item := range a {
-		for i := range plugins {
-			switch plug := plugins[i].p.(type) {
-			case AnnotationType:
-				if inArray(item.Name, plug.GetType()...) && plug.TypeIsSupported(p, f) {
-					c, err := plug.ProcessType(
-						plugins[i].context,
-						pkg,
-						p,
-						f,
-						item,
-					)
-					if err != nil {
-						return err
-					}
-					plugins[i].context = c
-					plugins[i].called = true
+		switch plug := pl.p.(type) {
+		case AnnotationType:
+			if inArray(item.Name, plug.GetType()...) && plug.TypeIsSupported(p, f) {
+				c, err := plug.ProcessType(
+					pl.context,
+					pkg,
+					p,
+					f,
+					item,
+				)
+				if err != nil {
+					return err
 				}
+				pl.context = c
+				pl.called = true
 			}
 		}
 	}
@@ -244,16 +245,14 @@ func processTypes(pkg humanize.Package, p humanize.File, f humanize.TypeName, a 
 }
 
 // Finalize all plugins
-func Finalize(p humanize.Package) error {
+func finalize(pl *plugin, p *humanize.Package) error {
 	lock.Lock()
 	defer lock.Unlock()
 
-	for i := range plugins {
-		if plugins[i].called {
-			err := plugins[i].p.Finalize(plugins[i].context, p)
-			if err != nil {
-				return err
-			}
+	if pl.called {
+		err := pl.p.Finalize(pl.context, p)
+		if err != nil {
+			return err
 		}
 	}
 

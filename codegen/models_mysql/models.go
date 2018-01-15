@@ -815,9 +815,23 @@ func (r *modelsPlugin) ProcessStructure(
 	return ctx, nil
 }
 
+func appendToPkg(pkg *humanize.Package, f string) error {
+	b, err := ioutil.ReadFile(f)
+	if err != nil {
+		return err
+	}
+	fl, err := humanize.ParseFile(string(b), pkg)
+	if err != nil {
+		fmt.Println(f)
+		return err
+	}
+	pkg.Files = append(pkg.Files, fl)
+	return nil
+}
+
 // Finalize is called after all the functions are done. the context is the one from the
 // process
-func (r *modelsPlugin) Finalize(c interface{}, _ humanize.Package) error {
+func (r *modelsPlugin) Finalize(c interface{}, p *humanize.Package) error {
 	var ctx context
 	if c != nil {
 		var ok bool
@@ -870,6 +884,10 @@ func (r *modelsPlugin) Finalize(c interface{}, _ humanize.Package) error {
 		if err != nil {
 			return err
 		}
+		if err := appendToPkg(p, f); err != nil {
+			return err
+		}
+
 		all = append(all, cda...)
 	}
 
@@ -892,6 +910,10 @@ func (r *modelsPlugin) Finalize(c interface{}, _ humanize.Package) error {
 		return err
 	}
 	err = ioutil.WriteFile(last, res, 0644)
+	if err := appendToPkg(p, last); err != nil {
+		return err
+	}
+
 	return err
 }
 

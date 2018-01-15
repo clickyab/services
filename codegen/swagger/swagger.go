@@ -107,7 +107,7 @@ func (rg *swaggerGenerator) GetType() []string {
 
 // Finalize is called after all the functions are done. the context is the one from the
 // process
-func (rg *swaggerGenerator) Finalize(c interface{}, p humanize.Package) error {
+func (rg *swaggerGenerator) Finalize(c interface{}, p *humanize.Package) error {
 	res, err := json.Marshal(typeCache)
 	assert.Nil(err)
 	pkg := filepath.Join(rg.workDir, strings.Replace(p.Path, "/", "_", -1)+"_definitions.json")

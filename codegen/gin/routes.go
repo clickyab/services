@@ -355,9 +355,22 @@ func (r *routerPlugin) mix(ctx []context) map[string]finalRoute {
 	return result
 }
 
+func appendToPkg(pkg *humanize.Package, f string) error {
+	b, err := ioutil.ReadFile(f)
+	if err != nil {
+		return err
+	}
+	fl, err := humanize.ParseFile(string(b), pkg)
+	if err != nil {
+		return err
+	}
+	pkg.Files = append(pkg.Files, fl)
+	return nil
+}
+
 // Finalize is called after all the functions are done. the context is the one from the
 // process
-func (r *routerPlugin) Finalize(c interface{}, _ humanize.Package) error {
+func (r *routerPlugin) Finalize(c interface{}, p *humanize.Package) error {
 	var ctx []context
 	if c != nil {
 		var ok bool
@@ -387,6 +400,10 @@ func (r *routerPlugin) Finalize(c interface{}, _ humanize.Package) error {
 		if err := ioutil.WriteFile(f, res, 0644); err != nil {
 			return err
 		}
+		if err := appendToPkg(p, f); err != nil {
+			return err
+		}
+
 	}
 
 	return nil
