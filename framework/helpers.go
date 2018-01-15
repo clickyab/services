@@ -7,6 +7,7 @@ import (
 	"strconv"
 	"strings"
 
+	"clickyab.com/gad/src/assert"
 	"github.com/clickyab/services/config"
 	"github.com/rs/xhandler"
 	"github.com/rs/xmux"
@@ -110,4 +111,31 @@ func GetPageAndCount(r *http.Request, offset bool) (int, int) {
 	}
 
 	return p, c
+}
+
+// Status is a simple interface to handle status
+type Status interface {
+	Status() int
+}
+
+// HeaderSet is a simple interface to handle header set
+type HeaderSet interface {
+	Headers() http.Header
+}
+
+// Write data in output based on interfaces
+func Write(w http.ResponseWriter, in interface{}, status int) {
+	if h, ok := in.(HeaderSet); ok {
+		headers := h.Headers()
+		for i := range headers {
+			w.Header().Add(i, headers.Get(i))
+		}
+	}
+
+	if s, ok := in.(Status); ok {
+		status = s.Status()
+	}
+	w.WriteHeader(status)
+	dec := json.NewEncoder(w)
+	assert.Nil(dec.Encode(in))
 }
