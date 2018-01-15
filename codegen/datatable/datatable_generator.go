@@ -463,9 +463,22 @@ func handleField(p humanize.Package, f humanize.Field, mapPrefix string) (Column
 	return clm, nil
 }
 
+func appendToPkg(pkg *humanize.Package, f string) error {
+	b, err := ioutil.ReadFile(f)
+	if err != nil {
+		return err
+	}
+	fl, err := humanize.ParseFile(string(b), pkg)
+	if err != nil {
+		return err
+	}
+	pkg.Files = append(pkg.Files, fl)
+	return nil
+}
+
 // Finalize is called after all the functions are done. the context is the one from the
 // process
-func (e dataTablePlugin) Finalize(c interface{}, p humanize.Package) error {
+func (e dataTablePlugin) Finalize(c interface{}, p *humanize.Package) error {
 	var ctx context
 	if c != nil {
 		var ok bool
@@ -492,7 +505,7 @@ func (e dataTablePlugin) Finalize(c interface{}, p humanize.Package) error {
 		mapPrefix := ctx[i].Ann.Items["map_prefix"]
 		for _, f := range st.Fields {
 			if isExported(f.Name) && f.Tags.Get("json") != "-" {
-				clm, err := handleField(p, *f, mapPrefix)
+				clm, err := handleField(*p, *f, mapPrefix)
 				if err != nil {
 					return err
 				}
@@ -508,7 +521,7 @@ func (e dataTablePlugin) Finalize(c interface{}, p humanize.Package) error {
 			}
 			for _, f := range tE.Type.(*humanize.StructType).Fields {
 				if isExported(f.Name) && f.Tags.Get("json") != "-" {
-					clm, err := handleField(p, *f, mapPrefix)
+					clm, err := handleField(*p, *f, mapPrefix)
 					if err != nil {
 						return err
 					}
@@ -549,14 +562,16 @@ func (e dataTablePlugin) Finalize(c interface{}, p humanize.Package) error {
 	if err != nil {
 		return err
 	}
-
+	if err := appendToPkg(p, f); err != nil {
+		return err
+	}
 	for i := range ctx {
 		pp, err := humanize.ParsePackage(ctx[i].Ann.Items["controller"])
 		if err != nil {
 			return err
 		}
 
-		sorts := []string{}
+		var sorts []string
 		for _, j := range ctx[i].Column {
 			if j.Sortable {
 				sorts = append(sorts, j.Data)
@@ -594,6 +609,10 @@ func (e dataTablePlugin) Finalize(c interface{}, p humanize.Package) error {
 		if err != nil {
 			return err
 		}
+		//if err := appendToPkg(p, f); err != nil {
+		//	return err
+		//}
+
 	}
 
 	//j, _ := json.MarshalIndent(ctx[0].Column, "\t", "\t")

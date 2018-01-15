@@ -7,7 +7,7 @@ import (
 	"strconv"
 	"strings"
 
-	"clickyab.com/gad/src/assert"
+	"github.com/clickyab/services/assert"
 	"github.com/clickyab/services/config"
 	"github.com/rs/xhandler"
 	"github.com/rs/xmux"

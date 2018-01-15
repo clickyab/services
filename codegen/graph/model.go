@@ -177,7 +177,20 @@ func extractValidFilter(p humanize.Package, t humanize.Type) (map[string]string,
 	return res, `"` + strings.Join(comma, `","`) + `"`
 }
 
-func (g graphPlugin) Finalize(c interface{}, p humanize.Package) error {
+func appendToPkg(pkg *humanize.Package, f string) error {
+	b, err := ioutil.ReadFile(f)
+	if err != nil {
+		return err
+	}
+	fl, err := humanize.ParseFile(string(b), pkg)
+	if err != nil {
+		return err
+	}
+	pkg.Files = append(pkg.Files, fl)
+	return nil
+}
+
+func (g graphPlugin) Finalize(c interface{}, p *humanize.Package) error {
 	var ctx context
 	if c != nil {
 		var ok bool
@@ -239,7 +252,7 @@ func (g graphPlugin) Finalize(c interface{}, p humanize.Package) error {
 			if !isExported(f.Name) {
 				continue
 			}
-			c, err := handleFilter(p, *f, mapPrefix)
+			c, err := handleFilter(*p, *f, mapPrefix)
 			if err != nil {
 				return err
 			}
@@ -271,6 +284,9 @@ func (g graphPlugin) Finalize(c interface{}, p humanize.Package) error {
 
 	err = ioutil.WriteFile(f, res, 0644)
 	if err != nil {
+		return err
+	}
+	if err := appendToPkg(p, f); err != nil {
 		return err
 	}
 
@@ -312,6 +328,10 @@ func (g graphPlugin) Finalize(c interface{}, p humanize.Package) error {
 		if err != nil {
 			return err
 		}
+		if err := appendToPkg(p, f); err != nil {
+			return err
+		}
+
 	}
 	return nil
 }

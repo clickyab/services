@@ -81,9 +81,22 @@ func (e enumPlugin) GetType() []string {
 	return []string{"Enum"}
 }
 
+func appendToPkg(pkg *humanize.Package, f string) error {
+	b, err := ioutil.ReadFile(f)
+	if err != nil {
+		return err
+	}
+	fl, err := humanize.ParseFile(string(b), pkg)
+	if err != nil {
+		return err
+	}
+	pkg.Files = append(pkg.Files, fl)
+	return nil
+}
+
 // Finalize is called after all the functions are done. the context is the one from the
 // process
-func (e enumPlugin) Finalize(c interface{}, p humanize.Package) error {
+func (e enumPlugin) Finalize(c interface{}, p *humanize.Package) error {
 	var ctx enumCtx
 	if c != nil {
 		var ok bool
@@ -114,6 +127,9 @@ func (e enumPlugin) Finalize(c interface{}, p humanize.Package) error {
 		return err
 	}
 	if err := ioutil.WriteFile(f, res, 0644); err != nil {
+		return err
+	}
+	if err := appendToPkg(p, f); err != nil {
 		return err
 	}
 
@@ -157,5 +173,5 @@ func (e enumPlugin) GetOrder() int {
 }
 
 func init() {
-	plugins.Register(enumPlugin{})
+	plugins.Register(&enumPlugin{})
 }

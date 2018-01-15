@@ -111,9 +111,22 @@ func (e validatePlugin) GetType() []string {
 	return []string{"Validate"}
 }
 
+func appendToPkg(pkg *humanize.Package, f string) error {
+	b, err := ioutil.ReadFile(f)
+	if err != nil {
+		return err
+	}
+	fl, err := humanize.ParseFile(string(b), pkg)
+	if err != nil {
+		return err
+	}
+	pkg.Files = append(pkg.Files, fl)
+	return nil
+}
+
 // Finalize is called after all the functions are done. the context is the one from the
 // process
-func (e validatePlugin) Finalize(c interface{}, p humanize.Package) error {
+func (e validatePlugin) Finalize(c interface{}, p *humanize.Package) error {
 	var ctx context
 	if c != nil {
 		var ok bool
@@ -147,6 +160,10 @@ func (e validatePlugin) Finalize(c interface{}, p humanize.Package) error {
 	if err != nil {
 		return err
 	}
+	if err := appendToPkg(p, f); err != nil {
+		return err
+	}
+
 	return nil
 }
 
