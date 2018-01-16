@@ -135,6 +135,7 @@ func Write(w http.ResponseWriter, in interface{}, status int) {
 	if s, ok := in.(Status); ok {
 		status = s.Status()
 	}
+	w.Header().Set(headerContentType, jsonMIME)
 	w.WriteHeader(status)
 	dec := json.NewEncoder(w)
 	assert.Nil(dec.Encode(in))
