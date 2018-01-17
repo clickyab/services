@@ -42,6 +42,11 @@ type graph{{ .Data.Entity|ucfirst }}Data struct {
 	Hidden bool    ` + "`json:\"hidden\"`" + `
 	Type   string  ` + "`json:\"type\"`" + `
 	Data   []float64 ` + "`json:\"data\"`" + `
+	Sum float64 ` + "`json:\"sum\"`" + `
+	Avg float64 ` + "`json:\"avg\"`" + `
+	Min float64 ` + "`json:\"min\"`" + `
+	Max float64 ` + "`json:\"max\"`" + `
+	OmitEmpty bool ` + "`json:\"-\"`" + `
 }
 
 // @Route {
@@ -76,17 +81,35 @@ func (ctrl *Controller) graph{{ .Data.Entity|ucfirst }}(ctx context.Context, w h
 	tm := make(map[string]graph{{ .Data.Entity|ucfirst }}Data)
 	pc := permission.NewInterfaceComplete(usr, usr.ID, "{{ .Data.View.Perm }}", "{{ .Data.View.Scope }}",domain.ID)
 	{{ range $i, $f := .Data.Layouts }}
+
 	tm["{{ $f.Name }}"] = graph{{ $.Data.Entity|ucfirst }}Data{
 					Name:   "{{ $f.Name }}",
 					Title:  "{{ $f.Title }}",
 					Type:   "{{ $f.Type }}",
 					Hidden: {{ $f.Hidden }},
+					OmitEmpty: {{ $f.OmitEmpty }},
 					Data:   make([]float64, l),
 				}{{ end }}
-	for _, v := range {{ .PackageName }}.New{{ .PackageName|ucfirst }}Manager().{{ .Data.Fill }}(pc, filter, search, params, from, to) {
+	for i, v := range {{ .PackageName }}.New{{ .PackageName|ucfirst }}Manager().{{ .Data.Fill }}(pc, filter, search, params, from, to) {
 		m, err := fn(v.{{ .Data.Key }})
 		assert.Nil(err)
-		{{ range $i, $f := .Data.Layouts }}tm["{{ $f.Name }}"].Data[m] += {{ if ne $f.FieldType "float64" }}float64(v.{{ $f.Field }}){{ else }}v.{{ $f.Field }}{{ end }}
+		{{ range $i, $f := .Data.Layouts }}
+		tx{{ $f.Name }}:= tm["{{ $f.Name }}"]
+		cv{{ $f.Name }}:= {{ if ne $f.FieldType "float64" }}float64(v.{{ $f.Field }}){{ else }}v.{{ $f.Field }}{{ end }}
+		tm["{{ $f.Name }}"].Data[m] += cv{{ $f.Name }}
+		tx{{ $f.Name }}.Sum += cv{{ $f.Name }}
+		if i == 0 {
+			tx{{ $f.Name }}.Min = cv{{ $f.Name }}
+			tx{{ $f.Name }}.Max = cv{{ $f.Name }}
+		} else {
+			if  cv{{ $f.Name }} > tx{{ $f.Name }}.Max {
+				tx{{ $f.Name }}.Max = cv{{ $f.Name }}
+			}
+			if tx{{ $f.Name }}.Min >  cv{{ $f.Name }} {
+				tx{{ $f.Name }}.Min = cv{{ $f.Name }}
+			}
+		}
+		tm["{{ $f.Name }}"] = tx{{ $f.Name }}
 		{{ end }}}
 	res := graph{{ .Data.Entity|ucfirst }}Response{
 		From:   from,
@@ -96,6 +119,12 @@ func (ctrl *Controller) graph{{ .Data.Entity|ucfirst }}(ctx context.Context, w h
 		Data: make([]graph{{ .Data.Entity|ucfirst }}Data, 0),
 	}
 	for _, v := range tm {
+		if v.Sum == 0 && v.OmitEmpty {
+			continue
+		}
+		if l!=0{
+			v.Avg = v.Sum / float64(l)
+		}
 		res.Data = append(res.Data, v)
 	}
 	ctrl.OKResponse(w, res)
@@ -166,7 +195,7 @@ func dateRange{{ .Data.Entity|ucfirst }}(f, t time.Time) (int, func({{ .Data.Key
 		{{ end }}
 			return v, nil
 		}
-		return 0, errors.New("out of range")
+		return 0, errors.New("out of range. probably mismatch key type. check {{ .Data.Fill }} annotation (e.g. daily to hourly or vice versa)")
 	}
 }
 
