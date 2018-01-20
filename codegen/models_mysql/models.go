@@ -520,11 +520,11 @@ func returnErr(key string) (interface{}, error) {
 	return nil, fmt.Errorf("the key %s is not exists", key)
 }
 
-func getFields(s *humanize.StructType) []string {
+func getFields(s *humanize.StructType, p *humanize.Package) []string {
 	var res []string
 	for i := range s.Embeds {
 		if t, ok := s.Embeds[i].Type.(*humanize.StructType); ok {
-			res = append(res, getFields(t)...)
+			res = append(res, getFields(t, p)...)
 		}
 	}
 
@@ -547,7 +547,27 @@ func getFields(s *humanize.StructType) []string {
 			res = append(res, t)
 		}
 	}
+
+	for _, fe := range s.Embeds {
+		tE, err := p.FindType(fe.Type.(*humanize.IdentType).Ident)
+		if err == nil {
+			for _, f := range tE.Type.(*humanize.StructType).Fields {
+				if isExported(f.Name) && f.Tags.Get("db") != "-" {
+					res = append(res, f.Tags.Get("db"))
+				}
+			}
+		}
+	}
+
 	return res
+}
+
+func isExported(s string) bool {
+	if len(s) == 0 {
+		panic("empty?")
+	}
+
+	return strings.ToUpper(s[:1]) == s[:1]
 }
 
 // GetType return all types that this plugin can operate on
@@ -808,7 +828,7 @@ func (r *modelsPlugin) ProcessStructure(
 			data.UpdatedAt = &updatedAt[0]
 		}
 	}
-	data.Fields = strings.Join(getFields(f.Type.(*humanize.StructType)), ",")
+	data.Fields = strings.Join(getFields(f.Type.(*humanize.StructType), &pkg), ",")
 
 	ctx.data[p.FileName] = append(ctx.data[p.FileName], data)
 
