@@ -53,7 +53,11 @@ type graph{{ .Data.Entity|ucfirst }}Data struct {
 //		url = {{ .Data.URL }}
 //		method = get
 //		resource = {{ .Data.View.Total }}
-//		200 = graph{{ .Data.Entity|ucfirst }}Response
+//		_from_ = string , from date rfc3339 ex:2002-10-02T15:00:00.05Z
+//		_to_ = string , to date rfc3339 ex:2002-10-02T15:00:00.05Z
+//		200 = graph{{ .Data.Entity|ucfirst }}Response{{ range $f := .Data.Conditions }}{{ if $f.Filter }}
+//		_{{ $f.Data }}_ = string , filter the {{ $f.Data }} field valid values are {{ $f.FilterValid }}{{ end }}{{ end }}{{ range $f := .Data.Conditions }}{{ if $f.Searchable }}
+//		_{{ $f.Data }}_ = string , search the {{ $f.Data }} field {{ end }}{{ end }}
 // }
 func (ctrl *Controller) graph{{ .Data.Entity|ucfirst }}(ctx context.Context, w http.ResponseWriter, r *http.Request) {
 	usr := authz.MustGetUser(ctx)
