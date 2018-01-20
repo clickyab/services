@@ -113,14 +113,25 @@ func GetPageAndCount(r *http.Request, offset bool) (int, int) {
 	return p, c
 }
 
-// Status is a simple interface to handle status
-type Status interface {
-	Status() int
+type httpError struct {
+	Err        string `json:"error"`
+	statusCode int    `json:"-"`
 }
 
-// HeaderSet is a simple interface to handle header set
-type HeaderSet interface {
-	Headers() http.Header
+func (f *httpError) Error() string {
+	return f.Err
+}
+
+func (f *httpError) Status() int {
+	return f.statusCode
+}
+
+// NewForbiddenError create new error
+func NewForbiddenError(err string) error {
+	return &httpError{
+		Err:        err,
+		statusCode: http.StatusForbidden,
+	}
 }
 
 // Write data in output based on interfaces
@@ -139,4 +150,14 @@ func Write(w http.ResponseWriter, in interface{}, status int) {
 	w.WriteHeader(status)
 	dec := json.NewEncoder(w)
 	assert.Nil(dec.Encode(in))
+}
+
+// Status is a simple interface to handle status
+type Status interface {
+	Status() int
+}
+
+// HeaderSet is a simple interface to handle header set
+type HeaderSet interface {
+	Headers() http.Header
 }
