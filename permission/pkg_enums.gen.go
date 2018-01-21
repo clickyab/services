@@ -6,7 +6,7 @@ import (
 	"database/sql/driver"
 
 	"github.com/clickyab/services/array"
-	"github.com/clickyab/services/trans"
+	"github.com/clickyab/services/gettext/t9e"
 )
 
 // IsValid try to validate enum value on ths type
@@ -29,10 +29,10 @@ func (e *UserScope) Scan(src interface{}) error {
 	case nil:
 		b = make([]byte, 0)
 	default:
-		return trans.E("unsupported type")
+		return t9e.G("unsupported type")
 	}
 	if !UserScope(b).IsValid() {
-		return trans.E("invaid value")
+		return t9e.G("invalid value")
 	}
 	*e = UserScope(b)
 	return nil
@@ -41,7 +41,7 @@ func (e *UserScope) Scan(src interface{}) error {
 // Value try to get the string slice representation in database
 func (e UserScope) Value() (driver.Value, error) {
 	if !e.IsValid() {
-		return nil, trans.E("invalid status")
+		return nil, t9e.G("invalid status")
 	}
 	return string(e), nil
 }

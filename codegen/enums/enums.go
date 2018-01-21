@@ -53,10 +53,10 @@ func (e *{{ $m.Type.Name }}) Scan(src interface{}) error {
 	case nil:
 		b = make([]byte, 0)
 	default:
-		return trans.E("unsupported type")
+		return t9e.G("unsupported type")
 	}
 	if !{{ $m.Type.Name }}(b).IsValid() {
-		return trans.E("invaid value")
+		return t9e.G("invalid value")
 	}
 	*e = {{ $m.Type.Name }}(b)
 	return nil
@@ -65,7 +65,7 @@ func (e *{{ $m.Type.Name }}) Scan(src interface{}) error {
 // Value try to get the string slice representation in database
 func (e {{ $m.Type.Name }}) Value() (driver.Value, error) {
 	if !e.IsValid() {
-		return nil, trans.E("invalid status")
+		return nil, t9e.G("invalid status")
 	}
 	return string(e), nil
 }
