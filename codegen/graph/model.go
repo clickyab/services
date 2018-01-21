@@ -331,9 +331,9 @@ func (g graphPlugin) Finalize(c interface{}, p *humanize.Package) error {
 		if err != nil {
 			return err
 		}
-		if err := appendToPkg(p, f); err != nil {
-			return err
-		}
+		//if err := appendToPkg(p, f); err != nil {
+		//	return err
+		//}
 
 	}
 	return nil
