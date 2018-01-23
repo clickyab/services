@@ -5,6 +5,7 @@ import (
 	"crypto/sha1"
 	"fmt"
 	"hash/crc32"
+	"hash/crc64"
 )
 
 // MD5 is the hash generation func for keys, md5 normally
@@ -26,4 +27,11 @@ func CRC32(k string) string {
 	x := crc32.New(crc32.IEEETable)
 	_, _ = x.Write([]byte(k))
 	return fmt.Sprint(x.Sum32())
+}
+
+// CRC64 hash string in crc64 method
+func CRC64(k string) int64 {
+	crc := crc64.New(crc64.MakeTable(crc64.ECMA))
+	crc.Write([]byte(k))
+	return int64(crc.Sum64())
 }
