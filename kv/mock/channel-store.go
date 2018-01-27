@@ -3,6 +3,8 @@ package mock
 import (
 	"sync"
 	"time"
+
+	"github.com/clickyab/services/kv"
 )
 
 type channelStore struct {
@@ -57,12 +59,7 @@ func (c *channelStore) Pop(key string, t time.Duration) (string, bool) {
 }
 
 // NewMockChannelStore return a new mock store for testing
-func NewMockChannelStore() interface {
-	// Push data in the store
-	Push(string, string, time.Duration)
-	// Pop and remove data from store, its blocking pop
-	Pop(string, time.Duration) (string, bool)
-} {
+func NewMockChannelStore() kv.Store {
 	return &channelStore{
 		c: make(map[string]chan string),
 	}
