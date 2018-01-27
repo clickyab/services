@@ -41,6 +41,7 @@ type graph{{ .Data.Entity|ucfirst }}Data struct {
 	Name   string  ` + "`json:\"name\"`" + `
 	Hidden bool    ` + "`json:\"hidden\"`" + `
 	Type   string  ` + "`json:\"type\"`" + `
+	Order   int64      ` + "`json:\"order\"`" + `
 	Data   []float64 ` + "`json:\"data\"`" + `
 	Sum float64 ` + "`json:\"sum\"`" + `
 	Avg float64 ` + "`json:\"avg\"`" + `
@@ -91,6 +92,7 @@ func (ctrl *Controller) graph{{ .Data.Entity|ucfirst }}(ctx context.Context, w h
 					Title:  "{{ $f.Title }}",
 					Type:   "{{ $f.Type }}",
 					Hidden: {{ $f.Hidden }},
+					Order: {{ $f.Order }},
 					OmitEmpty: {{ $f.OmitEmpty }},
 					Data:   make([]float64, l),
 				}{{ end }}

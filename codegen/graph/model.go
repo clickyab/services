@@ -8,6 +8,7 @@ import (
 	"io/ioutil"
 	"path/filepath"
 	"regexp"
+	"strconv"
 	"strings"
 
 	"time"
@@ -63,6 +64,7 @@ type layout struct {
 	Title     string
 	Name      string
 	Type      string
+	Order     int64
 	OmitEmpty bool
 }
 
@@ -139,8 +141,13 @@ func handleField(f humanize.Field) (layout, error) {
 	l.Title = s[1]
 	l.Type = s[2]
 	l.Hidden = strings.ToLower(s[3]) == "true"
-	if len(s) == 5 {
-		l.OmitEmpty = s[4] == "true"
+	var err error
+	l.Order, err = strconv.ParseInt(s[4], 10, 64)
+	if err != nil {
+		return l, err
+	}
+	if len(s) == 6 {
+		l.OmitEmpty = s[5] == "true"
 	}
 	return l, nil
 }
