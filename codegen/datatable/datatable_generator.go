@@ -44,6 +44,7 @@ type dataTable struct {
 	URL         string
 	Checkable   string
 	Multiselect string
+	SearchKey   string
 }
 
 type context []dataTable
@@ -171,6 +172,7 @@ type list{{ .Data.Entity|ucfirst }}DefResponse struct{
 	Checkable    bool            		` + "`json:\"checkable\"`" + `
 	Multiselect    bool            		` + "`json:\"multiselect\"`" + `
 	DateFilter    string            		` + "`json:\"datefilter\"`" + `
+	SearchKey    string            		` + "`json:\"searchkey\"`" + `
 	Columns permission.Columns      ` + "`json:\"columns\"`" + `
 }
 
@@ -220,7 +222,7 @@ func (u *Controller) list{{ .Data.Entity|ucfirst }}(ctx context.Context, w http.
 	search := make(map[string]string)
 	{{ range $f := .Data.Column }}
 	{{ if $f.Searchable }}
-	if e := r.URL.Query().Get("{{ $f.Data }}"); e != "" {
+	if e := r.URL.Query().Get("{{ $.Data.SearchKey }}"); e != "" {
 		search["{{ if ne $f.Transform "" }}{{ $f.Transform }}{{else}}{{ $f.Data }}{{end}}"] = e
 	}
 	{{ end }}
@@ -280,7 +282,7 @@ func (u *Controller) def{{ .Data.Entity|ucfirst }}(ctx context.Context, w http.R
 	hash := fmt.Sprintf("%x", h.Sum(nil))
 	u.OKResponse(
 		w,
-		list{{ .Data.Entity|ucfirst }}DefResponse{Checkable:{{ .Data.Checkable }},Multiselect:{{ .Data.Multiselect }},DateFilter:"{{ .Data.DateFilter }}",Hash:hash,Columns:list{{ .Data.Entity|ucfirst }}Definition},
+		list{{ .Data.Entity|ucfirst }}DefResponse{Checkable:{{ .Data.Checkable }},SearchKey:"{{ .Data.SearchKey }}",Multiselect:{{ .Data.Multiselect }},DateFilter:"{{ .Data.DateFilter }}",Hash:hash,Columns:list{{ .Data.Entity|ucfirst }}Definition},
 	)
 }
 
@@ -654,6 +656,7 @@ func (r *dataTablePlugin) ProcessStructure(
 	dt.Checkable = a.Items["checkable"]
 	dt.Multiselect = a.Items["multiselect"]
 	dt.DateFilter = a.Items["datefilter"]
+	dt.SearchKey = a.Items["searchkey"]
 
 	for i := range pkg.Files {
 		for _, fn := range pkg.Files[i].Functions {
