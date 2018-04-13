@@ -28,6 +28,8 @@ type Interface interface {
 	Has(scope UserScope, perm Token, d int64) (UserScope, bool)
 	// HasPermStringOn is the has perm on check
 	HasOn(perm Token, ownerID int64, parentIDs []int64, d int64, scopes ...UserScope) (UserScope, bool)
+	// GetChildes GetChildes
+	GetChildesPerm(UserScope, string, int64) []int64
 }
 
 // InterfaceComplete is the complete version of the interface to use
@@ -89,6 +91,11 @@ func (pc complete) GetCurrentToken() Token {
 // GetCurrentScope return the current scope for this object (maximum)
 func (pc complete) GetCurrentScope() UserScope {
 	return pc.scope
+}
+
+// GetChildes return the child ids for current user
+func (pc complete) GetChildesPerm(scope UserScope, perm string, d int64) []int64 {
+	return pc.inner.GetChildesPerm(scope, perm, d)
 }
 
 // Register register a permission
