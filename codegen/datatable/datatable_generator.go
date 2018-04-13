@@ -44,6 +44,7 @@ type dataTable struct {
 	URL         string
 	Checkable   string
 	Multiselect string
+	SearchKey   string
 }
 
 type context []dataTable
@@ -171,6 +172,7 @@ type list{{ .Data.Entity|ucfirst }}DefResponse struct{
 	Checkable    bool            		` + "`json:\"checkable\"`" + `
 	Multiselect    bool            		` + "`json:\"multiselect\"`" + `
 	DateFilter    string            		` + "`json:\"datefilter\"`" + `
+	SearchKey    string            		` + "`json:\"searchkey\"`" + `
 	Columns permission.Columns      ` + "`json:\"columns\"`" + `
 }
 
@@ -199,7 +201,6 @@ func (u *Controller) list{{ .Data.Entity|ucfirst }}(ctx context.Context, w http.
 	p, c := framework.GetPageAndCount(r, false)
 
 	filter := make(map[string]string)
-	dateRange := make(map[string]string)
 	{{ range $f := .Data.Column }}
 	{{ if $f.Filter }}
 	if e := r.URL.Query().Get("{{ $f.Data }}"); e != "" && {{ $.PackageName }}.{{ $f.FieldTypeString }}(e).IsValid() {
@@ -209,18 +210,31 @@ func (u *Controller) list{{ .Data.Entity|ucfirst }}(ctx context.Context, w http.
 	{{ end }}
 
 	//add date filter
+	var from,to string
 	if e := r.URL.Query().Get("from"); e != ""{
-		dateRange["from-{{ .Data.DateFilter }}"]=e
+		//validate param
+		fromTime,err:=time.Parse(time.RFC3339,e)
+		if err!=nil{
+			u.JSON(w, http.StatusBadRequest, err)
+			return
+		}
+		from="{{ .Data.DateFilter }}"+":"+fromTime.Truncate(time.Hour*24).Format("2006-01-02 00:00:00")
 	}
 
 	if e := r.URL.Query().Get("to"); e != ""{
-		dateRange["to-{{ .Data.DateFilter }}"]=e
+		//validate param
+		toTime,err:=time.Parse(time.RFC3339,e)
+		if err!=nil{
+			u.JSON(w, http.StatusBadRequest, err)
+			return
+		}
+		to="{{ .Data.DateFilter }}"+":"+toTime.Truncate(time.Hour*24).Format("2006-01-02 00:00:00")
 	}
 
 	search := make(map[string]string)
 	{{ range $f := .Data.Column }}
 	{{ if $f.Searchable }}
-	if e := r.URL.Query().Get("{{ $f.Data }}"); e != "" {
+	if e := r.URL.Query().Get("{{ $.Data.SearchKey }}"); e != "" {
 		search["{{ if ne $f.Transform "" }}{{ $f.Transform }}{{else}}{{ $f.Data }}{{end}}"] = e
 	}
 	{{ end }}
@@ -250,7 +264,11 @@ func (u *Controller) list{{ .Data.Entity|ucfirst }}(ctx context.Context, w http.
 	}
 
 	pc := permission.NewInterfaceComplete(usr, usr.ID, "{{ .Data.View.Perm }}", "{{ .Data.View.Scope }}",domain.ID)
-	dt, cnt := m.{{ .Data.Fill }}(pc, filter,dateRange, search, params, sort, order, p, c)
+	dt, cnt, err := m.{{ .Data.Fill }}(pc, filter,from,to, search, params, sort, order, p, c)
+	if err!=nil{
+		u.JSON(w,http.StatusBadRequest,err)
+		return
+	}
 	res := 		list{{ .Data.Entity|ucfirst }}Response{
 		Total:   cnt,
 		Data:    dt.Filter(usr),
@@ -280,7 +298,7 @@ func (u *Controller) def{{ .Data.Entity|ucfirst }}(ctx context.Context, w http.R
 	hash := fmt.Sprintf("%x", h.Sum(nil))
 	u.OKResponse(
 		w,
-		list{{ .Data.Entity|ucfirst }}DefResponse{Checkable:{{ .Data.Checkable }},Multiselect:{{ .Data.Multiselect }},DateFilter:"{{ .Data.DateFilter }}",Hash:hash,Columns:list{{ .Data.Entity|ucfirst }}Definition},
+		list{{ .Data.Entity|ucfirst }}DefResponse{Checkable:{{ .Data.Checkable }},SearchKey:"{{ .Data.SearchKey }}",Multiselect:{{ .Data.Multiselect }},DateFilter:"{{ .Data.DateFilter }}",Hash:hash,Columns:list{{ .Data.Entity|ucfirst }}Definition},
 	)
 }
 
@@ -654,6 +672,7 @@ func (r *dataTablePlugin) ProcessStructure(
 	dt.Checkable = a.Items["checkable"]
 	dt.Multiselect = a.Items["multiselect"]
 	dt.DateFilter = a.Items["datefilter"]
+	dt.SearchKey = a.Items["searchkey"]
 
 	for i := range pkg.Files {
 		for _, fn := range pkg.Files[i].Functions {
