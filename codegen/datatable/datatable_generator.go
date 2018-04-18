@@ -186,6 +186,7 @@ var (
 //		method = get
 //		_c_ = int , count per page
 //		_p_ = int , page number
+//		_{{ .Data.SearchKey}}_ = string , parameter for search
 //		_from_ = string , from date rfc3339 ex:2002-10-02T15:00:00.05Z
 //		_to_ = string , to date rfc3339 ex:2002-10-02T15:00:00.05Z
 //		resource = {{ .Data.View.Total }}{{ if .HasSort }}
