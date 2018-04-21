@@ -673,6 +673,9 @@ func (r *dataTablePlugin) ProcessStructure(
 	dt.Multiselect = a.Items["multiselect"]
 	dt.DateFilter = a.Items["datefilter"]
 	dt.SearchKey = a.Items["searchkey"]
+	if dt.SearchKey == "" {
+		dt.SearchKey = "q"
+	}
 
 	for i := range pkg.Files {
 		for _, fn := range pkg.Files[i].Functions {
