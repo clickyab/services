@@ -924,8 +924,11 @@ func structToRaml(pkg humanize.Package, st *humanize.StructType) (swaggerType, e
 		}
 		if name == "" {
 			// Embeded with no name
-			for k, v := range raml["properties"].(swaggerType) {
-				props[k] = v
+			emf, ok := raml["properties"].(swaggerType)
+			if ok {
+				for k, v := range emf {
+					props[k] = v
+				}
 			}
 		} else {
 			props["name"] = nameSt

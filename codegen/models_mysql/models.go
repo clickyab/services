@@ -96,8 +96,8 @@ import 	(
 // Create{{ $m.StructName }} try to save a new {{ $m.StructName }} in database
 func (m *Manager) Create{{ $m.StructName }}({{ $m.StructName|getvar }} *{{ $m.StructName }}) error {
 	{{ if $m.CreatedAt }}now := time.Now(){{ else if $m.UpdatedAt }}now := time.Now(){{ end }}
-	{{ if $m.CreatedAt }}{{ $m.StructName|getvar }}.CreatedAt = now{{ end }}
-	{{ if $m.UpdatedAt }}{{ $m.StructName|getvar }}.UpdatedAt = now{{ end }}
+	{{ if $m.CreatedAt }}{{if eq $m.CreatedAt.Type "time.Time"}}{{ $m.StructName|getvar }}.CreatedAt = now{{ end }}{{ end }}
+	{{ if $m.UpdatedAt }}{{if eq $m.UpdatedAt.Type "time.Time"}}{{ $m.StructName|getvar }}.UpdatedAt = now{{ end }}{{ end }}
 	func(in interface{}) {
 		if ii, ok := in.(initializer.Simple); ok {
 			ii.Initialize()
@@ -109,8 +109,10 @@ func (m *Manager) Create{{ $m.StructName }}({{ $m.StructName|getvar }} *{{ $m.St
 
 // Update{{ $m.StructName }} try to update {{ $m.StructName }} in database
 func (m *Manager) Update{{ $m.StructName }}({{ $m.StructName|getvar }} *{{ $m.StructName }}) error {
-	{{ if $m.UpdatedAt }}now := time.Now(){{ end }}
-	{{ if $m.UpdatedAt }}{{ $m.StructName|getvar }}.UpdatedAt = now{{ end }}
+	{{ if $m.UpdatedAt }}
+	{{if eq $m.UpdatedAt.Type "time.Time"}}{{ $m.StructName|getvar }}.UpdatedAt = time.Now()
+	{{else if eq $m.UpdatedAt.Type "mysql.NullTime"}}{{ $m.StructName|getvar }}.UpdatedAt = mysql.NullTime{Valid: true, Time: time.Now()}
+	{{ end }}{{ end }}
 	func(in interface{}) {
 		if ii, ok := in.(initializer.Simple); ok {
 			ii.Initialize()
@@ -121,8 +123,8 @@ func (m *Manager) Update{{ $m.StructName }}({{ $m.StructName|getvar }} *{{ $m.St
 	return err
 }
 {{ end }}
-{{ if $m.List }}
 
+{{ if $m.List }}
 // List{{ $m.StructName|plural }}WithFilter try to list all {{ $m.StructName|plural }} without pagination
 func (m *Manager) List{{ $m.StructName|plural }}WithFilter(filter string, params ...interface{}) []{{ $m.StructName }} {
 	filter = strings.Trim(filter, "\n\t ")
@@ -549,14 +551,19 @@ func getFields(s *humanize.StructType, p *humanize.Package) []string {
 	}
 
 	for _, fe := range s.Embeds {
-		tE, err := p.FindType(fe.Type.(*humanize.IdentType).Ident)
-		if err == nil {
-			for _, f := range tE.Type.(*humanize.StructType).Fields {
-				if isExported(f.Name) && f.Tags.Get("db") != "-" {
-					res = append(res, f.Tags.Get("db"))
+
+		ty, ok := fe.Type.(*humanize.IdentType)
+		if ok {
+			tE, err := p.FindType(ty.Ident)
+			if err == nil {
+				for _, f := range tE.Type.(*humanize.StructType).Fields {
+					if isExported(f.Name) && f.Tags.Get("db") != "-" {
+						res = append(res, f.Tags.Get("db"))
+					}
 				}
 			}
 		}
+
 	}
 
 	return res
