@@ -44,6 +44,7 @@ type dataTable struct {
 	URL         string
 	Checkable   string
 	Multiselect string
+	QueryParams string
 	SearchKey   string
 }
 
@@ -173,6 +174,7 @@ type list{{ .Data.Entity|ucfirst }}DefResponse struct{
 	Multiselect    bool            		` + "`json:\"multiselect\"`" + `
 	DateFilter    string            		` + "`json:\"datefilter\"`" + `
 	SearchKey    string            		` + "`json:\"searchkey\"`" + `
+	QueryParams    string            		` + "`json:\"queryparams\"`" + `
 	Columns permission.Columns      ` + "`json:\"columns\"`" + `
 }
 
@@ -219,7 +221,7 @@ func (u *Controller) list{{ .Data.Entity|ucfirst }}(ctx context.Context, w http.
 			u.JSON(w, http.StatusBadRequest, err)
 			return
 		}
-		from="{{ .Data.DateFilter }}"+":"+fromTime.Truncate(time.Hour*24).Format("2006-01-02 00:00:00")
+		from="{{ .Data.DateFilter }}"+"*"+fromTime.Truncate(time.Hour*24).Format("2006-01-02 00:00:00")
 	}
 
 	if e := r.URL.Query().Get("to"); e != ""{
@@ -229,7 +231,7 @@ func (u *Controller) list{{ .Data.Entity|ucfirst }}(ctx context.Context, w http.
 			u.JSON(w, http.StatusBadRequest, err)
 			return
 		}
-		to="{{ .Data.DateFilter }}"+":"+toTime.Truncate(time.Hour*24).Format("2006-01-02 00:00:00")
+		to="{{ .Data.DateFilter }}"+"*"+toTime.Truncate(time.Hour*24).Format("2006-01-02 00:00:00")
 	}
 
 	search := make(map[string]string)
@@ -264,8 +266,17 @@ func (u *Controller) list{{ .Data.Entity|ucfirst }}(ctx context.Context, w http.
 		params[i.Name] = xmux.Param(ctx,i.Name)
 	}
 
+	queryParams := make(map[string]string)
+	{{ if ne .Data.QueryParams "" }}
+		queryNames:="{{ .Data.QueryParams }}"
+		queryNamesArr:=strings.Split(queryNames,",")
+		for i := range queryNamesArr {
+		queryParams[queryNamesArr[i]] = r.URL.Query().Get(queryNamesArr[i])
+		}
+	{{ end }}
+
 	pc := permission.NewInterfaceComplete(usr, usr.ID, "{{ .Data.View.Perm }}", "{{ .Data.View.Scope }}",domain.ID)
-	dt, cnt, err := m.{{ .Data.Fill }}(pc, filter,from,to, search, params, sort, order, p, c)
+	dt, cnt, err := m.{{ .Data.Fill }}(pc, filter,from,to, search, params,queryParams, sort, order, p, c)
 	if err!=nil{
 		u.JSON(w,http.StatusBadRequest,err)
 		return
@@ -299,7 +310,7 @@ func (u *Controller) def{{ .Data.Entity|ucfirst }}(ctx context.Context, w http.R
 	hash := fmt.Sprintf("%x", h.Sum(nil))
 	u.OKResponse(
 		w,
-		list{{ .Data.Entity|ucfirst }}DefResponse{Checkable:{{ .Data.Checkable }},SearchKey:"{{ .Data.SearchKey }}",Multiselect:{{ .Data.Multiselect }},DateFilter:"{{ .Data.DateFilter }}",Hash:hash,Columns:list{{ .Data.Entity|ucfirst }}Definition},
+		list{{ .Data.Entity|ucfirst }}DefResponse{Checkable:{{ .Data.Checkable }},SearchKey:"{{ .Data.SearchKey }}",QueryParams:"{{ .Data.QueryParams }}",Multiselect:{{ .Data.Multiselect }},DateFilter:"{{ .Data.DateFilter }}",Hash:hash,Columns:list{{ .Data.Entity|ucfirst }}Definition},
 	)
 }
 
@@ -672,6 +683,7 @@ func (r *dataTablePlugin) ProcessStructure(
 	dt.URL = a.Items["url"]
 	dt.Checkable = a.Items["checkable"]
 	dt.Multiselect = a.Items["multiselect"]
+	dt.QueryParams = a.Items["queryparams"]
 	dt.DateFilter = a.Items["datefilter"]
 	dt.SearchKey = a.Items["searchkey"]
 	if dt.SearchKey == "" {
