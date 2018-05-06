@@ -64,6 +64,7 @@ type apiHeader struct {
 
 type apiMethod struct {
 	Description string                 `json:"description"`
+	Security    map[string]interface{} `yaml:"security,omitempty" json:"security,omitempty"`
 	Responses   map[string]interface{} `json:"responses"`
 	Parameters  []uriParameter         `yaml:"parameters,omitempty" json:"parameters,omitempty"`
 	Tags        []string               `json:"tags"`
@@ -470,6 +471,7 @@ func (rg *swaggerGenerator) ProcessFunction(ctx interface{}, pkg humanize.Packag
 		Description: getDoc(fn.Docs),
 		Responses:   make(map[string]interface{}),
 		Parameters:  ag.Parameters,
+		Security:    make(map[string]interface{}),
 	}
 	for _, p := range pp2 {
 		if v, ok := ann.Items["_"+p+"_"]; ok {
@@ -560,6 +562,11 @@ func (rg *swaggerGenerator) ProcessFunction(ctx interface{}, pkg humanize.Packag
 		} else if _, ok := ann.Items["resource"]; ok {
 			pro = true
 		}
+	}
+
+	am.Security = map[string]interface{}{
+		"protected": pro,
+		"resource":  ann.Items["resource"],
 	}
 
 	if pro {
