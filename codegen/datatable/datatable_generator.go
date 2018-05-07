@@ -151,11 +151,6 @@ package {{ .ControllerPackageName }}
 
 
 import (
-	"modules/user/aaa"
-	"modules/user/middlewares"
-	"github.com/clickyab/services/permission"
-	"github.com/rs/xmux"
-	"net/http"
 	"{{ .Model  }}"
 )
 
