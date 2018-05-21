@@ -38,8 +38,8 @@ type gorpLogger struct {
 type modelsInitializer struct {
 }
 
-func (modelsInitializer) Healthy(context.Context) error {
-	return db.Ping()
+func (modelsInitializer) Healthy(context.Context) (interface{}, error) {
+	return nil, db.Ping()
 }
 
 func (g gorpLogger) Printf(format string, v ...interface{}) {

@@ -214,17 +214,17 @@ func doMigration() {
 }
 
 // Healthy return true if the databases are ok and ready for ping
-func (in *initMysql) Healthy(context.Context) error {
+func (in *initMysql) Healthy(context.Context) (interface{}, error) {
 	rErr := ping(dbReplicated.Bool(), safeRead...)
 	var wErr error
 	if needWrite.Bool() {
 		wErr = ping(false, wdbmap)
 	}
 	if rErr != nil || wErr != nil {
-		return fmt.Errorf("mysql PING failed, read error was %s and write error was %s", rErr, wErr)
+		return nil, fmt.Errorf("mysql PING failed, read error was %s and write error was %s", rErr, wErr)
 	}
 
-	return nil
+	return nil, nil
 }
 
 // Manager is a base manager for transaction model
