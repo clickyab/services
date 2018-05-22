@@ -26,13 +26,13 @@ type initRedis struct {
 }
 
 // Healthy return true if the databases are ok and ready for ping
-func (initRedis) Healthy(context.Context) error {
+func (initRedis) Healthy(context.Context) (interface{}, error) {
 	ping, err := Client.Ping().Result()
 	if err != nil || strings.ToUpper(ping) != "PONG" {
-		return fmt.Errorf("redis PING failed. result was '%s' and the error was %s", ping, err)
+		return nil, fmt.Errorf("redis PING failed. result was '%s' and the error was %s", ping, err)
 	}
 
-	return nil
+	return nil, nil
 }
 
 // Initialize try to create a redis pool

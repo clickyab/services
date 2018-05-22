@@ -2,7 +2,6 @@ package mock
 
 import (
 	"sync"
-	"time"
 )
 
 var (
@@ -13,7 +12,7 @@ var (
 )
 
 type oneTimer struct {
-	d   time.Duration
+	// d   time.Duration // it is unused!
 	key string
 }
 

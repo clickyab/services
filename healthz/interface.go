@@ -7,8 +7,8 @@ import (
 
 // Interface is the checker interface
 type Interface interface {
-	// Check must return an error if the health is not ok
-	Healthy(context.Context) error
+	// Check must return message and an error if the health is not ok
+	Healthy(context.Context) (interface{}, error)
 }
 
 var (

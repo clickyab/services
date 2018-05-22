@@ -1,7 +1,9 @@
 package healthz
 
 import (
+	"encoding/json"
 	"errors"
+	"fmt"
 	"testing"
 
 	"context"
@@ -18,26 +20,29 @@ import (
 
 type mysqlHealth struct {
 	Err error
+	Msg string
 }
 
 type redisHealth struct {
 	Err error
+	Msg string
 }
 
 type brokerHealth struct {
 	Err error
+	Msg string
 }
 
-func (h *mysqlHealth) Healthy(context.Context) error {
-	return h.Err
+func (h *mysqlHealth) Healthy(context.Context) (interface{}, error) {
+	return h.Msg, h.Err
 }
 
-func (h *redisHealth) Healthy(context.Context) error {
-	return h.Err
+func (h *redisHealth) Healthy(context.Context) (interface{}, error) {
+	return h.Msg, h.Err
 }
 
-func (h *brokerHealth) Healthy(context.Context) error {
-	return h.Err
+func (h *brokerHealth) Healthy(context.Context) (interface{}, error) {
+	return h.Msg, h.Err
 }
 
 type MyHandler struct {
@@ -54,17 +59,23 @@ func (h *MyHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 }
 
 func TestHealth(t *testing.T) {
+	// hRes := make(map[string]map[string]interface{}, 2)
+	hRes := healthRes{}
+
 	handler := &MyHandler{}
 	server := httptest.NewServer(handler)
 	defer server.Close()
 	m := &mysqlHealth{
 		Err: nil,
+		Msg: "",
 	}
-	r := &mysqlHealth{
+	r := &redisHealth{
 		Err: nil,
+		Msg: "",
 	}
-	b := &mysqlHealth{
+	b := &brokerHealth{
 		Err: nil,
+		Msg: "",
 	}
 	Register(m, r, b)
 	convey.Convey("test with all ok", t, func() {
@@ -75,11 +86,12 @@ func TestHealth(t *testing.T) {
 		}
 		//logrus.Fatal(m.Err,r.Err,b.Err)
 		convey.So(resp.StatusCode, convey.ShouldEqual, http.StatusOK)
-
 	})
 
 	convey.Convey("mysql error", t, func() {
 		m.Err = errors.New("mysql error here")
+		r.Msg = "redis message here"
+
 		logrus.Warn(m.Err)
 		resp, err := http.Get(server.URL)
 		if err != nil {
@@ -89,9 +101,14 @@ func TestHealth(t *testing.T) {
 		if err != nil {
 			t.Fatal(err)
 		}
-		convey.So(resp.StatusCode, convey.ShouldEqual, http.StatusInternalServerError)
-		convey.So(string(msg), convey.ShouldEqual, "mysql error here")
 
+		if err := json.Unmarshal(msg, &hRes); err != nil {
+			t.Fatal(err)
+		}
+
+		convey.So(resp.StatusCode, convey.ShouldEqual, http.StatusInternalServerError)
+		convey.So(fmt.Sprint(hRes.Errors["mysqlHealth"]), convey.ShouldEqual, "mysql error here")
+		convey.So(fmt.Sprint(hRes.Messages["redisHealth"]), convey.ShouldEqual, "redis message here")
 	})
 
 	convey.Convey("mysql and redis error", t, func() {
@@ -105,9 +122,14 @@ func TestHealth(t *testing.T) {
 		if err != nil {
 			t.Fatal(err)
 		}
-		convey.So(resp.StatusCode, convey.ShouldEqual, http.StatusInternalServerError)
-		convey.So(string(msg), convey.ShouldEqual, "mysql error hereredis error here")
 
+		if err := json.Unmarshal(msg, &hRes); err != nil {
+			t.Fatal(err)
+		}
+
+		convey.So(resp.StatusCode, convey.ShouldEqual, http.StatusInternalServerError)
+		convey.So(fmt.Sprint(hRes.Errors["mysqlHealth"]), convey.ShouldEqual, "mysql error here")
+		convey.So(fmt.Sprint(hRes.Errors["redisHealth"]), convey.ShouldEqual, "redis error here")
 	})
 
 }
