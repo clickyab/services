@@ -134,7 +134,7 @@ func (m *Manager) List{{ $m.StructName|plural }}WithFilter(filter string, params
 	var res []{{ $m.StructName }}
 	_, err := m.GetRDbMap().Select(
 		&res,
-		fmt.Sprintf("SELECT %s FROM %s %s",getSelectFields({{ $m.StructName }}TableFull,""), {{ $m.StructName }}TableFull, filter),
+		fmt.Sprintf("SELECT %s FROM %s %s",GetSelectFields({{ $m.StructName }}TableFull,""), {{ $m.StructName }}TableFull, filter),
 		params...,
 	)
 	assert.Nil(err)
@@ -183,7 +183,7 @@ offset, perPage int, filter string, params ...interface{}) []{{ $m.StructName }}
 	// TODO : better pagination without offset and limit
 	_, err := m.GetRDbMap().Select(
 		&res,
-		fmt.Sprintf("SELECT %s FROM %s %s",getSelectFields({{ $m.StructName }}TableFull,""), {{ $m.StructName }}TableFull, filter),
+		fmt.Sprintf("SELECT %s FROM %s %s",GetSelectFields({{ $m.StructName }}TableFull,""), {{ $m.StructName }}TableFull, filter),
 		params...,
 	)
 	assert.Nil(err)
@@ -202,7 +202,7 @@ func (m* Manager) Find{{ $m.StructName }}By{{ $by.Name }}({{ $by.DB|getvar }} {{
 	var res {{ $m.StructName }}
 	err := m.GetRDbMap().SelectOne(
 		&res,
-		fmt.Sprintf("SELECT %s FROM %s WHERE {{ $by.DB }}=?",getSelectFields({{ $m.StructName }}TableFull,""), {{ $m.StructName }}TableFull),
+		fmt.Sprintf("SELECT %s FROM %s WHERE {{ $by.DB }}=?",GetSelectFields({{ $m.StructName }}TableFull,""), {{ $m.StructName }}TableFull),
 		{{ $by.DB|getvar }},
 	)
 
@@ -219,7 +219,7 @@ func (m *Manager) Filter{{ $m.StructName|plural }}By{{ $by.Name }}({{ $by.DB|get
 	var res []{{ $m.StructName }}
 	_, err := m.GetRDbMap().Select(
 		&res,
-		fmt.Sprintf("SELECT %s FROM %s WHERE {{ $by.DB }}=?",getSelectFields({{ $m.StructName }}TableFull,""), {{ $m.StructName }}TableFull),
+		fmt.Sprintf("SELECT %s FROM %s WHERE {{ $by.DB }}=?",GetSelectFields({{ $m.StructName }}TableFull,""), {{ $m.StructName }}TableFull),
 		{{ $by.DB|getvar }},
 	)
 	assert.Nil(err)
@@ -300,7 +300,7 @@ func (m *Manager) Get{{ .St|base }}{{ .Base|plural }}({{ .St|getvar }} *{{ .St }
 		&res,
 		fmt.Sprintf(
 			"SELECT %s FROM %s WHERE {{ .Field.DB }}=?",
-			getSelectFields({{ .Base }}TableFull,""),
+			GetSelectFields({{ .Base }}TableFull,""),
 			{{ .Base }}TableFull,
 		),
 		{{.St|getvar}}.{{ .Target }},
@@ -333,7 +333,7 @@ func (m *Manager) Get{{ .Base|base }}{{ .St|plural }}({{ .Base|getvar }} *{{ .Ba
 		&res,
 		fmt.Sprintf(
 			"SELECT %s FROM %s WHERE {{ .Field.DB }}=?",
-			getSelectFields({{ .St }}TableFull,""),
+			GetSelectFields({{ .St }}TableFull,""),
 			{{ .St }}TableFull,
 		),
 		{{.Base|getvar}}.ID,
@@ -376,7 +376,7 @@ const ({{ range $m := .Data }}
 {{ end }})
 
 
-func getSelectFields(tb string, alias string) string {
+func GetSelectFields(tb string, alias string) string {
 	if alias != "" {
 		alias +="."
 	}

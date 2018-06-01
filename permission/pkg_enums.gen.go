@@ -15,6 +15,7 @@ func (e UserScope) IsValid() bool {
 		string(e),
 		string(ScopeSelf),
 		string(ScopeGlobal),
+		string(ScopeSuperGlobal),
 	)
 }
 
