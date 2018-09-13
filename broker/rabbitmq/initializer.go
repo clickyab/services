@@ -11,8 +11,7 @@ import (
 
 	"fmt"
 
-	"github.com/clickyab/services/safe"
-	"github.com/sirupsen/logrus"
+		"github.com/sirupsen/logrus"
 	"github.com/streadway/amqp"
 )
 
@@ -155,7 +154,6 @@ func (in *initRabbit) Healthy(context.Context) error {
 
 // Initialize the module at the beginning of the application to create a publish channel
 func (in *initRabbit) Initialize(ctx context.Context) {
-
 	once.Do(func() {
 		// the size is here for channel to not block the caller. since we read this on the health check command
 		in.notifyCloser = make(chan *amqp.Error, 10)
@@ -167,24 +165,13 @@ func (in *initRabbit) Initialize(ctx context.Context) {
 		}
 		connRng = ring.New(cnt)
 		for i := 0; i < cnt; i++ {
-			safe.Try(func() error {
-				c, err := amqp.Dial(dsn.String())
-				if err == nil {
-					connRng.Value = c
+					connRng.Value = newConnection()
 					connRng = connRng.Next()
-				}
-				return err
-			}, tryLimit.Duration())
 		}
-
 		connRng = connRng.Next()
-
-		conn := connRng.Value.(*amqp.Connection)
+		conn := connRng.Value.(*ccn).Connection()
 		chn, err := conn.Channel()
 		assert.Nil(err)
-		defer func() {
-			assert.Nil(chn.Close())
-		}()
 
 		assert.Nil(
 			chn.ExchangeDeclare(
@@ -201,7 +188,7 @@ func (in *initRabbit) Initialize(ctx context.Context) {
 		rng = ring.New(publisher.Int())
 		for i := 0; i < publisher.Int(); i++ {
 			connRng = connRng.Next()
-			conn := connRng.Value.(*amqp.Connection)
+			conn := connRng.Value.(*ccn).Connection()
 			pchn, err := conn.Channel()
 			assert.Nil(err)
 			rtrn := make(chan amqp.Confirmation, confirmLen.Int())
@@ -210,7 +197,7 @@ func (in *initRabbit) Initialize(ctx context.Context) {
 			pchn.NotifyPublish(rtrn)
 			tmp := chnlLock{
 				chn:    pchn,
-				lock:   &sync.Mutex{},
+				Mutex:   &sync.Mutex{},
 				wg:     &sync.WaitGroup{},
 				rtrn:   rtrn,
 				closed: false,
