@@ -43,8 +43,9 @@ type dataTable struct {
 	Entity      string
 	URL         string
 	Checkable   string
+	PreventSelf bool
+	CheckLevel  bool
 	Multiselect string
-	QueryParams string
 	SearchKey   string
 }
 
@@ -107,18 +108,18 @@ func ({{ $m.Type|getvar }} {{ $m.Type }}) Filter(u permission.Interface) {{ $m.T
 	{{ end }}
 	{{ range $clm := $m.Column }}
 	{{ if $clm.Edit }}
-	if _, ok := u.HasOn("{{ $clm.Edit.Perm }}", {{ $m.Type|getvar }}.OwnerID, {{ $m.Type|getvar }}.ParentIDs,{{ $m.Type|getvar }}.DomainID {{ $clm.Edit.Scope|scopeArg }}); ok {
+	if _, ok := u.HasOn("{{ $clm.Edit.Perm }}", {{ $m.Type|getvar }}.OwnerID,{{ $m.Type|getvar }}.DomainID,{{ $m.CheckLevel}},{{ $m.PreventSelf}} {{ $clm.Edit.Scope|scopeArg }}); ok {
 		action = append(action, "inline_{{$clm.Name}}")
 	}
 	{{ end }}
 	{{ if $clm.HasPerm }}
-	if _, ok := u.HasOn("{{ $clm.Perm.Perm }}", {{ $m.Type|getvar }}.OwnerID, {{ $m.Type|getvar }}.ParentIDs,{{ $m.Type|getvar }}.DomainID {{ $clm.Perm.Scope|scopeArg }}); ok {
+	if _, ok := u.HasOn("{{ $clm.Perm.Perm }}", {{ $m.Type|getvar }}.OwnerID,{{ $m.Type|getvar }}.DomainID,{{ $m.CheckLevel }},{{ $m.PreventSelf }} {{ $clm.Perm.Scope|scopeArg }}); ok {
 		res.{{ $clm.Name }} = {{ if $clm.Format }} {{ $m.Type|getvar }}.Format{{ $clm.Name}}()  {{ else }}{{ $m.Type|getvar }}.{{ $clm.Name}} {{ end }}
 	}
 	{{ end }}
 	{{ end }}
 	{{ range $act, $perm := $m.Actions }}
-	if _, ok := u.HasOn("{{ $perm.Perm }}", {{ $m.Type|getvar }}.OwnerID, {{ $m.Type|getvar }}.ParentIDs,{{ $m.Type|getvar }}.DomainID {{ $perm.Scope|scopeArg }}); ok {
+	if _, ok := u.HasOn("{{ $perm.Perm }}", {{ $m.Type|getvar }}.OwnerID,{{ $m.Type|getvar }}.DomainID,{{ $m.CheckLevel }},{{ $m.PreventSelf }} {{ $perm.Scope|scopeArg }}); ok {
 		action = append(action, "{{ $act }}")
 	}
 	{{ end }}
@@ -167,9 +168,10 @@ type list{{ .Data.Entity|ucfirst }}DefResponse struct{
 	Hash    string            		` + "`json:\"hash\"`" + `
 	Checkable    bool            		` + "`json:\"checkable\"`" + `
 	Multiselect    bool            		` + "`json:\"multiselect\"`" + `
+	CheckLevel    bool            		` + "`json:\"checklevel\"`" + `
+	PreventSelf    bool            		` + "`json:\"preventself\"`" + `
 	DateFilter    string            		` + "`json:\"datefilter\"`" + `
 	SearchKey    string            		` + "`json:\"searchkey\"`" + `
-	QueryParams    string            		` + "`json:\"queryparams\"`" + `
 	Columns permission.Columns      ` + "`json:\"columns\"`" + `
 }
 
@@ -261,17 +263,8 @@ func (u *Controller) list{{ .Data.Entity|ucfirst }}(ctx context.Context, w http.
 		params[i.Name] = xmux.Param(ctx,i.Name)
 	}
 
-	queryParams := make(map[string]string)
-	{{ if ne .Data.QueryParams "" }}
-		queryNames:="{{ .Data.QueryParams }}"
-		queryNamesArr:=strings.Split(queryNames,",")
-		for i := range queryNamesArr {
-		queryParams[queryNamesArr[i]] = r.URL.Query().Get(queryNamesArr[i])
-		}
-	{{ end }}
-
 	pc := permission.NewInterfaceComplete(usr, usr.ID, "{{ .Data.View.Perm }}", "{{ .Data.View.Scope }}",domain.ID)
-	dt, cnt, err := m.{{ .Data.Fill }}(pc, filter,from,to, search, params,queryParams, sort, order, p, c)
+	dt, cnt, err := m.{{ .Data.Fill }}(pc, filter,from,to, search, params, sort, order, p, c)
 	if err!=nil{
 		u.JSON(w,http.StatusBadRequest,err)
 		return
@@ -305,7 +298,7 @@ func (u *Controller) def{{ .Data.Entity|ucfirst }}(ctx context.Context, w http.R
 	hash := fmt.Sprintf("%x", h.Sum(nil))
 	u.OKResponse(
 		w,
-		list{{ .Data.Entity|ucfirst }}DefResponse{Checkable:{{ .Data.Checkable }},SearchKey:"{{ .Data.SearchKey }}",QueryParams:"{{ .Data.QueryParams }}",Multiselect:{{ .Data.Multiselect }},DateFilter:"{{ .Data.DateFilter }}",Hash:hash,Columns:list{{ .Data.Entity|ucfirst }}Definition},
+		list{{ .Data.Entity|ucfirst }}DefResponse{Checkable:{{ .Data.Checkable }},SearchKey:"{{ .Data.SearchKey }}",Multiselect:{{ .Data.Multiselect }},CheckLevel:{{ .Data.CheckLevel }},PreventSelf:{{ .Data.PreventSelf }},DateFilter:"{{ .Data.DateFilter }}",Hash:hash,Columns:list{{ .Data.Entity|ucfirst }}Definition},
 	)
 }
 
@@ -678,11 +671,20 @@ func (r *dataTablePlugin) ProcessStructure(
 	dt.URL = a.Items["url"]
 	dt.Checkable = a.Items["checkable"]
 	dt.Multiselect = a.Items["multiselect"]
-	dt.QueryParams = a.Items["queryparams"]
 	dt.DateFilter = a.Items["datefilter"]
 	dt.SearchKey = a.Items["searchkey"]
 	if dt.SearchKey == "" {
 		dt.SearchKey = "q"
+	}
+	pd := a.Items["preventself"]
+	cd := a.Items["checklevel"]
+	dt.PreventSelf = false
+	dt.CheckLevel = false
+	if pd == "true" {
+		dt.PreventSelf = true
+	}
+	if cd == "true" {
+		dt.CheckLevel = true
 	}
 
 	for i := range pkg.Files {

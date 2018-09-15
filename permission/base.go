@@ -20,6 +20,8 @@ const (
 	ScopeSelf UserScope = "self"
 	// ScopeGlobal means the entire perm, no param is required
 	ScopeGlobal UserScope = "global"
+	// ScopeSuperGlobal means the entire perm, no param is required and domain less
+	ScopeSuperGlobal UserScope = "superGlobal"
 )
 
 // Interface is the perm interface
@@ -27,7 +29,7 @@ type Interface interface {
 	// HasPermString is the has perm check
 	Has(scope UserScope, perm Token, d int64) (UserScope, bool)
 	// HasPermStringOn is the has perm on check
-	HasOn(perm Token, ownerID int64, parentIDs []int64, d int64, scopes ...UserScope) (UserScope, bool)
+	HasOn(perm Token, ownerID int64, d int64, checkLevel bool, preventSelf bool, scopes ...UserScope) (UserScope, bool)
 	// GetChildes GetChildes
 	GetChildesPerm(UserScope, string, int64) []int64
 }
@@ -74,8 +76,8 @@ func (pc complete) Has(scope UserScope, perm Token, d int64) (UserScope, bool) {
 }
 
 // HasPermStringOn is the has perm on check
-func (pc complete) HasOn(perm Token, ownerID int64, parentIDs []int64, d int64, scopes ...UserScope) (UserScope, bool) {
-	return pc.inner.HasOn(perm, ownerID, parentIDs, d, scopes...)
+func (pc complete) HasOn(perm Token, ownerID int64, d int64, checkLevel bool, preventSelf bool, scopes ...UserScope) (UserScope, bool) {
+	return pc.inner.HasOn(perm, ownerID, d, checkLevel, preventSelf, scopes...)
 }
 
 // GetID return the id of holder
@@ -130,9 +132,6 @@ func GetAll() map[Token]string {
 // NewInterfaceComplete return a new object base on the minimum object
 func NewInterfaceComplete(inner Interface, id int64, perm Token, scope UserScope, domainID int64) InterfaceComplete {
 	s, ok := inner.Has(scope, perm, domainID)
-	if !ok {
-		s, ok = inner.Has(ScopeGlobal, God, domainID)
-	}
 	assert.True(ok, "[BUG] probably there is some thing wrong with code generation")
 	pc := &complete{
 		inner:    inner,
